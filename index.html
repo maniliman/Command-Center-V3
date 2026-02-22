@@ -1,0 +1,3324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>Sovereign v87</title>
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/512/shield.png" />
+  <link
+    rel="manifest"
+    href="data:application/manifest+json,{%22name%22:%22Vault%22,%22short_name%22:%22Vault%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#000000%22,%22theme_color%22:%22#2F8F78%22,%22icons%22:[{%22src%22:%22https://img.icons8.com/fluency/512/shield.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}"
+  />
+
+  <style>
+    :root{
+      --bg:#000;
+      --fg:#e5e5e5;
+      --muted:#9ca3af;
+
+      --cardA:#0b0b0c;
+      --cardB:#111114;
+
+      --line:#1a1a1f;
+      --line2:#141418;
+
+      --emerald:#2F8F78;
+      --red:#B85B5B;
+      --blue:#3A6EA8;
+      --yellow:#B89B4A;
+
+      --safe-top: env(safe-area-inset-top, 20px);
+      --safe-bot: env(safe-area-inset-bottom, 0px);
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
+      font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      padding-top:calc(var(--safe-top) + 10px);
+      padding-bottom:calc(110px + var(--safe-bot));
+      overflow-x:hidden;
+    }
+
+    /* Helpers */
+    .flex{display:flex;}
+    .between{justify-content:space-between;}
+    .center{align-items:center;}
+    .gap8{gap:8px;}
+    .gap12{gap:12px;}
+    .col{display:flex;flex-direction:column;}
+    .hidden{display:none !important;}
+    .tiny{font-size:10px;letter-spacing:.12em;text-transform:uppercase;}
+    .mask{}
+    .muted{color:var(--muted);}
+    .black{font-weight:900;}
+    .bold{font-weight:700;}
+    .tap{cursor:pointer;}
+    .tap:active{opacity:.75;}
+
+    /* Top bar */
+    .topbar{
+      padding:0 12px;
+      margin-bottom:14px;
+    }
+    .iconbtn{
+      width:40px;height:40px;border-radius:14px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.08);
+      color:#fff;display:inline-flex;align-items:center;justify-content:center;
+      cursor:pointer;
+    }
+    .kebab{font-size:22px;letter-spacing:2px;line-height:0;transform:translateY(-1px)}
+
+    /* Hero */
+    .hero{
+      margin:0 12px;
+      border-radius:26px;
+      background:linear-gradient(145deg,#111114 0%, #050506 100%);
+      border:1px solid rgba(47,143,120,0.12);
+      padding:26px 18px 18px 18px;
+      user-select:none;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+    .networth{
+      font-size:46px;
+      font-weight:900;
+      text-align:center;
+      margin:14px 0 12px 0;
+      line-height:1.05;
+      letter-spacing:.01em;
+    }
+    .heroMini{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+      padding:8px 6px 0 6px;
+    }
+    .mini{
+      text-align:center;
+      min-width:0;
+    }
+    .miniAmt{
+      font-size:12px;
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-variant-numeric: tabular-nums;
+    }
+    .miniLbl{
+      margin-top:6px;
+      font-size:10px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-weight:900;
+      opacity:.75;
+    }
+    .cCash{color:var(--emerald)}
+    .cAssets{color:var(--blue)}
+    .cDebt{color:var(--yellow)}
+
+    /* Ledger list */
+    .ledger{
+      margin:14px 12px 0 12px;
+      border-top:1px solid var(--line2);
+    }
+    .ledgerRow{
+      display:grid;
+      grid-template-columns: 1fr minmax(140px, 180px);
+      align-items:center;
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid var(--line2);
+    }
+    .ledgerName{
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      padding-left:2px;
+      line-height:1.2;
+    }
+    .ledgerVal{
+      justify-self:end;
+      text-align:right;
+      font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums;
+      letter-spacing:.01em;
+      padding-right:2px;
+    }
+
+    /* Inline ledger dropdown bodies */
+    .ledgerBody{
+      display:none;
+      padding:10px 0 2px 0;
+      border-bottom:1px solid var(--line2);
+    }
+    .ledgerBody.open{display:block;}
+    .ledgerSubline{
+      margin:2px 0 8px 0;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.03em;
+    }
+
+    /* Audit dropdown */
+    .auditWrap{
+      margin:14px 12px 0 12px;
+      border-top:1px solid var(--line2);
+    }
+    .auditHead{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:12px 0;
+      border-bottom:1px solid var(--line2);
+      opacity:.9;
+      cursor:pointer;
+      user-select:none;
+    }
+    .auditChevron{opacity:.7;font-weight:900;}
+    .auditBody{
+      display:none;
+      padding:10px 0 2px 0;
+    }
+    .open .auditBody{display:block;}
+
+    /* Row style */
+    .row{
+      display:grid;
+      grid-template-columns: 1fr minmax(140px, 180px);
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid #121216;
+      align-items:start;
+    }
+    .row:last-child{border-bottom:none;}
+    .rowLeft{min-width:0;}
+    .rowName{
+      font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .rowMeta{
+      font-size:11px;color:var(--muted);margin-top:3px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+    }
+    .rowAmt{
+      justify-self:end;
+      text-align:right;
+      white-space:nowrap;
+      font-size:12px;
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Compact list row */
+    .tightRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid #121216;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tightLeft{min-width:0;display:flex;flex-direction:column;gap:4px;}
+    .tightTop{display:flex;align-items:center;gap:8px;min-width:0;}
+    .tightText{
+      font-size:12px;
+      font-weight:900;
+      letter-spacing:.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .tightMeta{
+      font-size:11px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .tightAmt{
+      font-size:12px;
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      text-align:right;
+    }
+
+    /* Inputs */
+    .input{
+      width:100%;
+      background:transparent;
+      border:none;
+      color:#fff;
+      font-size:16px;
+      outline:none;
+      padding:12px 0;
+      border-bottom:1px solid #2a2a2f;
+    }
+    .input:focus{border-bottom-color:var(--emerald);}
+
+    .bigAmount{
+      width:100%;
+      background:transparent;border:none;outline:none;
+      color:#fff;text-align:center;
+      font-size:50px;font-weight:900;
+      padding:18px 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hintBox{
+      margin-top:8px;
+      border:1px solid #151518;
+      border-radius:18px;
+      padding:12px;
+      background:rgba(255,255,255,.03);
+    }
+    .hintTitle{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .hintRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      padding-top:10px;
+      font-size:12px;
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .btn{
+      background:#101114;
+      border:1px solid #2a2a2f;
+      color:#fff;
+      border-radius:16px;
+      padding:14px 16px;
+      font-weight:900;
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+    .btnWide{width:100%;padding:18px 16px;font-size:13px;}
+    .danger{border-color:var(--red);color:var(--red);}
+
+    /* Entry tiles */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .tile{
+      background:#101114;
+      border:1px solid #2a2a2f;
+      border-radius:20px;
+      padding:18px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:10px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tileIcon{width:22px;height:22px;opacity:.95;}
+    .tileLabel{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;}
+
+    /* Overlays */
+    .overlay{
+      position:fixed;inset:0;
+      background:#000;
+      z-index:2000;
+      padding:18px 18px calc(120px + var(--safe-bot)) 18px;
+      padding-top:80px;
+      overflow:auto;
+    }
+    .overlayTop{
+      position:fixed;left:0;right:0;top:0;
+      padding-top:calc(var(--safe-top) + 12px);
+      padding-bottom:12px;
+      background:rgba(0,0,0,.85);
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid #111;
+      z-index:2100;
+    }
+    .overlayBar{padding:0 18px;display:flex;justify-content:space-between;align-items:center;}
+    .xbtn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;}
+
+    /* FAB */
+    .fab{
+      position:fixed;right:22px;bottom:calc(26px + var(--safe-bot));
+      width:64px;height:64px;border-radius:999px;
+      border:none;cursor:pointer;
+      box-shadow:0 16px 40px rgba(0,0,0,.6);
+      z-index:5000;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .fabPlus{background:linear-gradient(135deg,var(--emerald),#1f5f51);color:#001b12;font-size:28px;font-weight:900;}
+    .fabBack{background:#232327;color:#fff;font-size:22px;font-weight:900;}
+
+    /* Badges */
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid #2a2a2f;
+      background:#0d0d10;
+      font-size:10px;font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#cbd5e1;
+      flex:0 0 auto;
+    }
+    .bIn{border-color:rgba(47,143,120,.22);color:var(--emerald);}
+    .bOut{border-color:rgba(184,91,91,.22);color:var(--red);}
+    .bAsset{border-color:rgba(58,110,168,.22);color:var(--blue);}
+    .bIOU{border-color:rgba(184,155,74,.22);color:var(--yellow);}
+    .bFid{border-color:rgba(184,155,74,.22);color:var(--yellow);}
+    .bRev{border-color:rgba(255,255,255,.18);color:rgba(255,255,255,.65);}
+
+    /* Toast */
+    .toast{
+      position:fixed;left:50%;transform:translateX(-50%);
+      bottom:calc(110px + var(--safe-bot));
+      background:rgba(16,16,20,.92);
+      border:1px solid #2a2a2f;
+      color:#fff;
+      padding:12px 14px;
+      border-radius:16px;
+      z-index:6000;
+      min-width:260px;
+      max-width:92vw;
+      display:none;
+      align-items:center;justify-content:space-between;gap:12px;
+      backdrop-filter: blur(14px);
+    }
+    .toast.show{display:flex;}
+    .toastBtn{
+      background:transparent;border:1px solid #2a2a2f;
+      color:#fff;border-radius:12px;
+      padding:8px 10px;
+      font-weight:900;font-size:10px;
+      letter-spacing:.08em;text-transform:uppercase;
+      cursor:pointer;
+    }
+
+    /* Bottom sheet */
+    .sheetScrim{
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.6);
+      z-index:8000;
+      opacity:0;pointer-events:none;
+      transition:opacity .15s ease;
+    }
+    .sheetScrim.on{opacity:1;pointer-events:auto;}
+    .sheet{
+      position:fixed;left:0;right:0;bottom:0;
+      z-index:9000;
+      transform:translateY(110%);
+      transition:transform .18s ease;
+      background:#070708;
+      border-top:1px solid #222;
+      border-top-left-radius:22px;
+      border-top-right-radius:22px;
+      padding:14px 16px calc(18px + var(--safe-bot)) 16px;
+      max-height:78vh;
+      overflow:auto;
+    }
+    .sheet.on{transform:translateY(0);}
+    .grab{width:46px;height:5px;border-radius:99px;background:#2a2a2f;margin:4px auto 12px auto;}
+    .sheetTitle{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;}
+    .sheetAmt{font-size:28px;font-weight:900;margin-top:8px;font-variant-numeric: tabular-nums;}
+    .kv{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #151518;}
+    .kv:last-child{border-bottom:none;}
+    .kvL{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:.08em;}
+    .kvR{font-size:12px;font-weight:900;color:#fff;text-align:right;max-width:65%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .sheetActions{display:flex;gap:10px;margin-top:14px;}
+    .sheetActions .btn{flex:1}
+    .stealth .mask{filter:blur(16px);opacity:.25;}
+
+    /* Simple switch */
+    .switch{
+      position:relative;width:46px;height:26px;border-radius:999px;
+      background:#1a1a1f;border:1px solid #2a2a2f;
+      cursor:pointer;flex:0 0 auto;
+    }
+    .switch::after{
+      content:"";
+      position:absolute;top:3px;left:3px;
+      width:20px;height:20px;border-radius:999px;
+      background:#fff;opacity:.85;
+      transition:transform .15s ease;
+    }
+    .switch.on{background:rgba(47,143,120,.16);border-color:rgba(16,185,129,.4);}
+    .switch.on::after{transform:translateX(20px);background:var(--emerald);opacity:1;}
+
+    /* Segments */
+    .seg{
+      display:flex;
+      gap:8px;
+      background:#0a0a0c;
+      border:1px solid #1f1f24;
+      border-radius:18px;
+      padding:6px;
+      overflow:hidden;
+    }
+    .seg button{
+      flex:1;
+      background:transparent;
+      border:1px solid transparent;
+      color:#fff;
+      padding:10px 10px;
+      border-radius:14px;
+      font-weight:900;
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      cursor:pointer;
+      opacity:.75;
+    }
+    .seg button.on{
+      background:#101114;
+      border-color:#2a2a2f;
+      opacity:1;
+    }
+
+    /* Liquidity columns */
+    .cols3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+      margin-top:8px;
+    }
+    .colCard{
+      background:rgba(255,255,255,.03);
+      border:1px solid #151518;
+      border-radius:18px;
+      padding:12px;
+      min-width:0;
+    }
+    .colCard .lbl{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .colCard .amt{
+      margin-top:8px;
+      font-size:14px;
+      font-weight:900;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Ledger embedded search */
+    .miniSearch{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid #1f1f24;
+      border-radius:16px;
+      padding:10px 12px;
+      background:#0a0a0c;
+      margin:6px 0 10px 0;
+    }
+    .miniSearch input{
+      border:none !important;
+      padding:0 !important;
+      margin:0 !important;
+      font-size:12px !important;
+    }
+
+    /* Two column fiduciary */
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:6px;
+    }
+    .panel{
+      background:rgba(255,255,255,.03);
+      border:1px solid #151518;
+      border-radius:18px;
+      padding:10px 12px;
+      min-width:0;
+    }
+    .panelHead{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:8px;
+    }
+    .panelTitle{
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .listItem{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      padding:10px 0;
+      border-bottom:1px solid #121216;
+      cursor:pointer;
+      user-select:none;
+    }
+    .listItem:last-child{border-bottom:none;}
+    .liName{
+      font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .liAmt{
+      font-size:12px;font-weight:900;font-variant-numeric: tabular-nums;white-space:nowrap;
+    }
+    .detailBox{
+      margin-top:12px;
+      background:rgba(255,255,255,.03);
+      border:1px solid #151518;
+      border-radius:18px;
+      padding:12px;
+    }
+    .detailTitle{
+      display:flex;justify-content:space-between;align-items:center;gap:10px;
+      margin-bottom:10px;
+    }
+    .detailTitle .t{
+      font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .detailTitle .s{
+      font-size:11px;color:var(--muted);font-weight:900;white-space:nowrap;
+    }
+    .chipBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid #2a2a2f;
+      background:#0d0d10;
+      font-size:10px;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#cbd5e1;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chipDanger{border-color:rgba(184,91,91,.22);color:var(--red);}
+    .chipGood{border-color:rgba(47,143,120,.22);color:var(--emerald);}
+  </style>
+</head>
+
+<body>
+  <!-- AUTH -->
+  <div id="auth" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted">Security</div>
+        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+      </div>
+    </div>
+    <div class="col" style="min-height: calc(100vh - 200px);justify-content:center;align-items:center;">
+      <div style="font-size:44px;margin-bottom:10px;">🔒</div>
+      <input id="authPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6""
+             style="text-align:center;font-size:40px;letter-spacing:10px;width:220px;"
+             placeholder="••••••" />
+      <button class="btn btnWide" id="unlockBtn" style="margin-top:26px;">Unlock</button>
+      <div class="tiny muted" style="margin-top:14px;">PIN required</div>
+    </div>
+  </div>
+
+  <!-- TOP BAR -->
+  <div class="topbar flex between center">
+    <div class="tiny muted">SOVEREIGN V87</div>
+    <div class="flex gap8">
+      <button class="iconbtn" title="Search" data-view="search" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#fff" stroke-width="2" opacity=".9"/>
+          <path d="M16.5 16.5 21 21" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        </svg>
+      </button>
+      <button class="iconbtn" title="More" data-view="more" aria-label="More">
+        <span class="kebab">⋯</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <div class="hero" id="heroCard" title="Long-press to toggle Stealth">
+      <div class="networth mask" id="nw">₦0</div>
+
+      <div class="heroMini">
+        <div class="mini">
+          <div class="miniAmt cCash mask" id="cash">₦0</div>
+          <div class="miniLbl">Cash</div>
+        </div>
+        <div class="mini">
+          <div class="miniAmt cAssets mask" id="assets">₦0</div>
+          <div class="miniLbl">Assets</div>
+        </div>
+        <div class="mini">
+          <div class="miniAmt cDebt mask" id="debt">₦0</div>
+          <div class="miniLbl">Debt</div>
+        </div>
+      </div>
+    
+
+    <!-- Backup reminder banner -->
+    <div id="backupBanner" class="hintBox hidden" style="margin:14px 12px 0 12px;">
+      <div class="hintTitle">Backup reminder</div>
+      <div class="flex between center" style="margin-top:10px;gap:12px;">
+        <div id="backupBannerText" class="muted" style="font-size:12px;font-weight:900;line-height:1.3;max-width:62%;">—</div>
+        <div class="flex gap8">
+          <button class="toastBtn" id="backupBannerDo">Export</button>
+          <button class="toastBtn" id="backupBannerSnooze">Snooze</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+    <!-- Ledger list -->
+    <div class="ledger" id="ledger">
+      <div class="ledgerRow tap" data-open-ledger="liquidity">
+        <div class="ledgerName" style="color:var(--emerald)">Liquidity</div>
+        <div class="ledgerVal mask" style="color:var(--emerald)" id="liq">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="liquidity"></div>
+
+      <div class="ledgerRow tap" data-open-ledger="expenses">
+        <div class="ledgerName" style="color:var(--red)">Expenses</div>
+        <div class="ledgerVal mask" style="color:var(--red)" id="exTotal">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="expenses"></div>
+
+      <div class="ledgerRow tap" data-open-ledger="assets">
+        <div class="ledgerName" style="color:var(--blue)">Assets</div>
+        <div class="ledgerVal mask" style="color:var(--blue)" id="asTotal">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="assets"></div>
+
+      <div class="ledgerRow tap" data-open-ledger="debtors">
+        <div class="ledgerName" style="color:var(--emerald)">Debtors</div>
+        <div class="ledgerVal mask" style="color:var(--emerald)" id="dbTotal">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="debtors"></div>
+
+      <div class="ledgerRow tap" data-open-ledger="creditors">
+        <div class="ledgerName" style="color:rgba(255,255,255,.35)">Creditors</div>
+        <div class="ledgerVal mask" style="color:var(--red)" id="crTotal">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="creditors"></div>
+
+      <div class="ledgerRow tap" data-open-ledger="fiduciary">
+        <div class="ledgerName" style="color:var(--yellow)">Fiduciary</div>
+        <div class="ledgerVal mask" style="color:var(--yellow)" id="fidTotal">₦0</div>
+      </div>
+      <div class="ledgerBody" data-ledger-body="fiduciary"></div>
+    </div>
+
+    <!-- AUDIT TRAIL -->
+    <div class="auditWrap" id="cAudit" style="opacity:.92;">
+      <div class="auditHead" data-toggle="cAudit">
+        <div class="ledgerName muted">Audit trail</div>
+        <div class="auditChevron muted">▼</div>
+      </div>
+      <div class="auditBody">
+        <input id="auditFilter" class="input" style="font-size:12px" placeholder="Filter..." />
+        <div id="auditList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTRY GRID -->
+  <div id="entry" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted">New entry</div>
+        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px;">
+      <div class="tile" data-form="income" style="border-color:rgba(47,143,120,.22)">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3v18" stroke="#2F8F78" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7 8l5-5 5 5" stroke="#2F8F78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--emerald)">Inflow</div>
+      </div>
+
+      <div class="tile" data-form="expense" style="border-color:rgba(184,91,91,.22)">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 21V3" stroke="#B85B5B" stroke-width="2" stroke-linecap="round"/>
+          <path d="M17 16l-5 5-5-5" stroke="#B85B5B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--red)">Expense</div>
+      </div>
+
+      <div class="tile" data-form="asset">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7Z" stroke="#3A6EA8" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--blue)">Asset</div>
+      </div>
+
+      <div class="tile" data-form="borrow">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M7 7h10v10H7z" stroke="#B85B5B" stroke-width="2" opacity=".9"/>
+          <path d="M12 7v10" stroke="#B85B5B" stroke-width="2" opacity=".6"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--red)">Borrow</div>
+      </div>
+
+      <div class="tile" data-form="lend">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M7 7h10v10H7z" stroke="#2F8F78" stroke-width="2" opacity=".9"/>
+          <path d="M7 12h10" stroke="#2F8F78" stroke-width="2" opacity=".6"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--emerald)">Lend</div>
+      </div>
+
+      <div class="tile" data-form="fid">
+        <svg class="tileIcon" viewBox="0 0 24 24" fill="none">
+          <path d="M7 7h10v14H7z" stroke="#B89B4A" stroke-width="2"/>
+          <path d="M9 3h6v4H9z" stroke="#B89B4A" stroke-width="2"/>
+        </svg>
+        <div class="tileLabel" style="color:var(--yellow)">Fiduciary</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div id="form" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted" id="formTitle">Entry</div>
+        <button class="xbtn" data-view="entry">✕</button>
+      </div>
+    </div>
+
+    <div class="hintBox hidden" id="amountHint">
+      <div class="hintTitle" id="amountHintTitle">Amount</div>
+      <div class="hintRow">
+        <div id="amountHintLeft" class="muted">—</div>
+        <div id="amountHintRight" class="mask">—</div>
+      </div>
+    </div>
+
+    <input id="amount" class="bigAmount" type="number" inputmode="numeric" placeholder="0" />
+    <div id="segWrap" style="margin:0 0 16px 0" class="hidden"></div>
+    <div id="dyn" style="margin:0 0 16px 0"></div>
+
+    <input id="desc" class="input" placeholder="Description" list="nameList" />
+    <datalist id="nameList"></datalist>
+
+    <input id="note" class="input" placeholder="Note (optional)" />
+
+    <button class="btn btnWide" id="execBtn" style="margin-top:22px;">Execute</button>
+
+    <div class="tiny muted" style="margin-top:14px;">
+      Loans (Borrow/Lend/Settlements) are IOU-only: they do not change Net Worth or Liquidity.
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="search" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted">Search</div>
+        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+      </div>
+    </div>
+
+    <div class="flex gap12" style="align-items:center;margin-top:10px;">
+      <div class="flex gap8" style="flex:1;align-items:center;border:1px solid #1f1f24;border-radius:16px;padding:10px 12px;background:#0a0a0c;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#9ca3af" stroke-width="2"/>
+          <path d="M16.5 16.5 21 21" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input id="q" class="input" style="border:none;padding:0;margin:0;" placeholder="Search anything…" />
+      </div>
+      <button class="iconbtn" id="clearQ" title="Clear">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".9"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="flex gap8" style="flex-wrap:wrap;margin-top:14px;">
+      <span class="badge" data-qtype="all">All</span>
+      <span class="badge bIn" data-qtype="income">IN</span>
+      <span class="badge bOut" data-qtype="expense">OUT</span>
+      <span class="badge bAsset" data-qtype="asset">ASSET</span>
+      <span class="badge bIOU" data-qtype="iou">IOU</span>
+      <span class="badge bFid" data-qtype="fid">FID</span>
+    </div>
+
+    <div class="grid2" style="margin-top:14px;">
+      <input id="qStart" class="input" style="font-size:12px" type="date" />
+      <input id="qEnd" class="input" style="font-size:12px" type="date" />
+    </div>
+
+    <div id="qRes" class="col" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- MORE -->
+  <div id="more" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted">More</div>
+        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+      </div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:10px;background:rgba(255,255,255,.03);">
+      <div class="flex between center" style="padding:6px 0;">
+        <div>
+          <div class="tiny muted">Stealth</div>
+          <div style="margin-top:4px;opacity:.9;font-size:14px;">Mask all money</div>
+        </div>
+        <div id="stealthSwitch" class="switch" role="switch" aria-checked="false"></div>
+      </div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:12px;background:rgba(255,255,255,.03);">
+      <button class="btn btnWide" data-view="settings">Settings</button>
+      <div class="flex gap12" style="margin-top:12px;">
+        <button class="btn" style="flex:1" id="backupBtn2">Backup</button>
+        <button class="btn" style="flex:1;color:var(--emerald)" id="restoreBtn2">Restore</button>
+        <input id="file2" type="file" class="hidden" />
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings" class="overlay hidden" aria-hidden="true">
+    <div class="overlayTop">
+      <div class="overlayBar">
+        <div class="tiny muted">Settings</div>
+        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+      </div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:10px;background:rgba(255,255,255,.03);">
+      <div class="flex between center" style="margin-bottom:12px;">
+        <div class="tiny muted">PIN startup</div>
+        <input id="reqPin" type="checkbox" />
+      </div>
+      <input id="setPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6""
+             style="text-align:center;letter-spacing:10px;font-size:22px;"
+             placeholder="••••••" />
+      <button class="btn btnWide" id="savePinBtn" style="margin-top:14px;">Update PIN</button>
+      <div class="tiny muted" style="margin-top:10px;">PIN is hashed (best-effort) — app won’t crash if crypto isn’t available.</div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:12px;background:rgba(255,255,255,.03);">
+      <div class="tiny muted">Money rules</div>
+
+      <div class="flex between center" style="margin-top:12px;">
+        <div>
+          <div class="tiny muted">Allow overdraft</div>
+          <div style="margin-top:4px;opacity:.9;font-size:14px;">Let accounts go negative</div>
+        </div>
+        <div id="odSwitch" class="switch" role="switch" aria-checked="false"></div>
+      </div>
+
+      <div class="tiny muted" style="margin-top:10px;">
+        Default is OFF. With overdraft OFF, an expense is blocked if the account has insufficient funds.
+      </div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:12px;background:rgba(255,255,255,.03);">
+      <div class="tiny muted">Backup & safety</div>
+
+      <div class="flex between center" style="margin-top:12px;">
+        <div>
+          <div class="tiny muted">Auto-backup</div>
+          <div style="margin-top:4px;opacity:.9;font-size:14px;">Local snapshots on every change</div>
+        </div>
+        <div id="abSwitch" class="switch on" role="switch" aria-checked="true" title="Always on"></div>
+      </div>
+
+      <div class="flex between center" style="margin-top:14px;">
+        <div>
+          <div class="tiny muted">Backup reminder cadence</div>
+          <div style="margin-top:4px;opacity:.9;font-size:14px;">Nudge me to export a backup</div>
+        </div>
+      </div>
+      <select id="backupCadence" class="input" style="font-size:12px;">
+        <option value="off">Off</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+
+      <div class="flex gap12" style="margin-top:12px;">
+        <button class="btn" style="flex:1" id="backupBtn">Backup</button>
+        <button class="btn" style="flex:1;color:var(--emerald)" id="restoreBtn">Restore</button>
+        <input id="file" type="file" class="hidden" />
+      </div>
+
+      <button class="btn btnWide danger" id="wipeBtn" style="margin-top:12px;">Wipe device data</button>
+
+      <div class="tiny muted" style="margin-top:10px;">
+        Restore is migration-safe and will snapshot your current state before applying.
+      </div>
+    </div>
+
+    <div style="border:1px solid #151518;border-radius:18px;padding:16px;margin-top:12px;background:rgba(255,255,255,.03);">
+      <div class="tiny muted">Diagnostics</div>
+      <button class="btn btnWide" id="diagBtn" style="margin-top:12px;">Show quick diagnostics</button>
+      <div id="diagOut" class="tiny muted" style="margin-top:10px;line-height:1.5;"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <div id="toastText" style="font-weight:900;font-size:12px;letter-spacing:.02em;">Done</div>
+    <button id="toastBtn" class="toastBtn hidden">Undo</button>
+  </div>
+
+  <!-- Bottom sheet -->
+  <div id="sheetScrim" class="sheetScrim"></div>
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="grab"></div>
+    <div class="sheetTitle" id="sheetTitle">Entry</div>
+    <div class="sheetAmt mask" id="sheetAmt">₦0</div>
+    <div id="sheetMeta" style="margin-top:10px;"></div>
+
+    <div class="sheetActions">
+      <button class="btn" id="editBtn">Edit</button>
+      <button class="btn" id="dupBtn">Duplicate</button>
+      <button class="btn danger" id="delBtn">Delete</button>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button id="fab" class="fab fabPlus" aria-label="New entry">＋</button>
+
+  <script>
+    /***********************
+     * Sovereign v87 (patched)
+     * New patches included:
+     * - Inflow split (fluid): allocate by % or by amount; any 2 fields auto-complete the 3rd
+     * - Ledger search keyboard fix: no full re-render on every keystroke; filter rows in-place
+     * - Restore/backup hardening: autoSnapshot snapshots the state being saved, sanitize amounts, better restore errors, reset file inputs
+     ***********************/
+
+    const SCHEMA_VERSION = 1;
+
+    const STORE_KEYS = [
+      "sovereign_v87_state",
+      "sovereign_v86_state",
+      "sovereign_v86",
+      "sovereign_state",
+      "vault_state",
+      "vault_v86"
+    ];
+
+    const AUTO_KEYS = {
+      lastGood: "sovereign_last_good",
+      preRestore: "sovereign_pre_restore",
+      ringPrefix: "sovereign_auto_",
+      ringIndex: "sovereign_auto_index"
+    };
+
+    const AUTO_RING_SIZE = 10;
+    const PERIODIC_SNAPSHOT_MS = 15 * 60 * 1000; // 15 minutes
+
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    const VIEWS = ["dashboard","auth","entry","form","search","more","settings"];
+
+    const state = loadState();
+    let currentView = "dashboard";
+
+    // ---- Lock gate ----
+    let isUnlocked = false;
+    let failedUnlocks = 0;
+    let lockUntilTs = 0;
+    function lockRequired(){ return !!state.settings.requirePin && !!state.settings.pinHash; }
+    function lockNow(){ if(!lockRequired()) return; isUnlocked = false; showView("auth"); }
+
+    let currentForm = null;                // 'income' | 'expense' | 'asset' | 'borrow' | 'lend' | 'fid'
+    let currentEditId = null;              // when editing, points to entry being superseded
+    let currentSheetId = null;
+    let openLedger = null;
+
+    const ledgerFilters = {
+      expenses: "",
+      assets: "",
+      debtors: "",
+      creditors: "",
+      fiduciary: ""
+    };
+
+    const fidDetail = { mode: null, key: null }; // {mode:'goal'|'person', key:string}
+
+    // ---------- DOM refs ----------
+    const el = {
+      dashboard: $("#dashboard"),
+      auth: $("#auth"),
+      entry: $("#entry"),
+      form: $("#form"),
+      search: $("#search"),
+      more: $("#more"),
+      settings: $("#settings"),
+
+      nw: $("#nw"),
+      cash: $("#cash"),
+      assets: $("#assets"),
+      debt: $("#debt"),
+      liq: $("#liq"),
+      exTotal: $("#exTotal"),
+      asTotal: $("#asTotal"),
+      dbTotal: $("#dbTotal"),
+      crTotal: $("#crTotal"),
+      fidTotal: $("#fidTotal"),
+
+      ledger: $("#ledger"),
+
+      auditWrap: $("#cAudit"),
+      auditFilter: $("#auditFilter"),
+      auditList: $("#auditList"),
+
+      heroCard: $("#heroCard"),
+
+      fab: $("#fab"),
+
+      // form
+      formTitle: $("#formTitle"),
+      amountHint: $("#amountHint"),
+      amountHintTitle: $("#amountHintTitle"),
+      amountHintLeft: $("#amountHintLeft"),
+      amountHintRight: $("#amountHintRight"),
+      amount: $("#amount"),
+      segWrap: $("#segWrap"),
+      dyn: $("#dyn"),
+      desc: $("#desc"),
+      note: $("#note"),
+      execBtn: $("#execBtn"),
+      nameList: $("#nameList"),
+
+      // search
+      q: $("#q"),
+      qRes: $("#qRes"),
+      qStart: $("#qStart"),
+      qEnd: $("#qEnd"),
+      clearQ: $("#clearQ"),
+
+      // auth
+      authPin: $("#authPin"),
+      unlockBtn: $("#unlockBtn"),
+
+      // stealth
+      stealthSwitch: $("#stealthSwitch"),
+
+      // settings
+      reqPin: $("#reqPin"),
+      setPin: $("#setPin"),
+      savePinBtn: $("#savePinBtn"),
+      backupBtn: $("#backupBtn"),
+      restoreBtn: $("#restoreBtn"),
+      file: $("#file"),
+      wipeBtn: $("#wipeBtn"),
+
+      backupBtn2: $("#backupBtn2"),
+      restoreBtn2: $("#restoreBtn2"),
+      file2: $("#file2"),
+
+      odSwitch: $("#odSwitch"),
+      abSwitch: $("#abSwitch"),
+      backupCadence: $("#backupCadence"),
+
+      diagBtn: $("#diagBtn"),
+      diagOut: $("#diagOut"),
+
+      // sheet
+      sheetScrim: $("#sheetScrim"),
+      sheet: $("#sheet"),
+      sheetTitle: $("#sheetTitle"),
+      sheetAmt: $("#sheetAmt"),
+      sheetMeta: $("#sheetMeta"),
+      editBtn: $("#editBtn"),
+      dupBtn: $("#dupBtn"),
+      delBtn: $("#delBtn"),
+
+      // toast
+      toast: $("#toast"),
+      toastText: $("#toastText"),
+      toastBtn: $("#toastBtn"),
+
+      // backup banner
+      backupBanner: $("#backupBanner"),
+      backupBannerText: $("#backupBannerText"),
+      backupBannerDo: $("#backupBannerDo"),
+      backupBannerSnooze: $("#backupBannerSnooze")
+    };
+
+    // ---------- Init ----------
+    boot();
+
+    function boot(){
+      hydrateSettingsUI();
+      applyStealth(state.settings.stealth);
+
+      // navigation buttons
+      document.body.addEventListener("click", (e) => {
+        const v = e.target.closest("[data-view]")?.getAttribute("data-view");
+        if(v) {
+          if(v === "dashboard") showView("dashboard");
+          else showView(v);
+        }
+        const t = e.target.closest("[data-toggle]")?.getAttribute("data-toggle");
+        if(t) toggleAudit(t);
+      });
+
+      // fab
+      el.fab.addEventListener("click", () => {
+        if(currentView === "dashboard") showView("entry");
+        else if(currentView === "entry") showView("dashboard");
+        else showView("dashboard");
+      });
+
+      // hero long-press stealth toggle
+      setupLongPress(el.heroCard, () => {
+        state.settings.stealth = !state.settings.stealth;
+        saveState("stealth_toggle");
+        applyStealth(state.settings.stealth);
+        syncStealthSwitch();
+        toast(state.settings.stealth ? "Stealth ON" : "Stealth OFF");
+      });
+
+      // ledger open/close
+      el.ledger.addEventListener("click", (e) => {
+        const row = e.target.closest("[data-open-ledger]");
+        if(!row) return;
+        const key = row.getAttribute("data-open-ledger");
+        toggleLedger(key);
+      });
+
+      // ledger body interactions
+      el.ledger.addEventListener("click", (e) => {
+        const entryId = e.target.closest("[data-entry-id]")?.getAttribute("data-entry-id");
+        if(entryId) return openSheet(entryId);
+
+        const deb = e.target.closest("[data-debtor]");
+        if(deb) return showDebtDetails("debtors", deb.getAttribute("data-debtor"));
+
+        const cre = e.target.closest("[data-creditor]");
+        if(cre) return showDebtDetails("creditors", cre.getAttribute("data-creditor"));
+
+        const asset = e.target.closest("[data-asset]");
+        if(asset) return showAssetDetails(asset.getAttribute("data-asset"));
+
+        const upd = e.target.closest("[data-asset-update]");
+        if(upd) return openForm("asset", { assetMode:"update", assetName: upd.getAttribute("data-asset-update") });
+
+        const fidGoal = e.target.closest("[data-fid-goal]");
+        if(fidGoal) {
+          fidDetail.mode = "goal";
+          fidDetail.key = fidGoal.getAttribute("data-fid-goal");
+          renderLedgerBody("fiduciary");
+          applyLedgerFilter("fiduciary", ledgerFilters.fiduciary || "");
+          return;
+        }
+
+        const fidPerson = e.target.closest("[data-fid-person]");
+        if(fidPerson) {
+          fidDetail.mode = "person";
+          fidDetail.key = fidPerson.getAttribute("data-fid-person");
+          renderLedgerBody("fiduciary");
+          applyLedgerFilter("fiduciary", ledgerFilters.fiduciary || "");
+          return;
+        }
+
+        const fidClear = e.target.closest("[data-fid-clear]");
+        if(fidClear){
+          fidDetail.mode = null; fidDetail.key = null;
+          renderLedgerBody("fiduciary");
+          applyLedgerFilter("fiduciary", ledgerFilters.fiduciary || "");
+          return;
+        }
+
+        const fidBack = e.target.closest("[data-fid-back]");
+        if(fidBack){
+          fidDetail.mode = null; fidDetail.key = null;
+          renderLedgerBody("fiduciary");
+          applyLedgerFilter("fiduciary", ledgerFilters.fiduciary || "");
+          return;
+        }
+      });
+
+      // audit filter & clicks
+      el.auditFilter.addEventListener("input", () => renderAudit());
+      el.auditList.addEventListener("click", (e) => {
+        const id = e.target.closest("[data-entry-id]")?.getAttribute("data-entry-id");
+        if(id) openSheet(id);
+      });
+
+      // entry tiles -> open form
+      $$(".tile", el.entry).forEach(tile => {
+        tile.addEventListener("click", () => openForm(tile.getAttribute("data-form")));
+      });
+
+      // execute
+      el.execBtn.addEventListener("click", executeForm);
+
+      // search overlay
+      el.clearQ.addEventListener("click", () => { el.q.value = ""; renderSearch(); });
+      el.q.addEventListener("input", renderSearch);
+      el.qStart.addEventListener("change", renderSearch);
+      el.qEnd.addEventListener("change", renderSearch);
+      $$(".badge[data-qtype]", el.search).forEach(b => {
+        b.addEventListener("click", () => {
+          $$(".badge[data-qtype]", el.search).forEach(x => x.style.opacity = ".55");
+          b.style.opacity = "1";
+          state.ui.searchType = b.getAttribute("data-qtype");
+          saveState("search_type");
+          renderSearch();
+        });
+      });
+      el.qRes.addEventListener("click", (e) => {
+        const id = e.target.closest("[data-entry-id]")?.getAttribute("data-entry-id");
+        if(id) openSheet(id);
+      });
+
+      // stealth switch
+      el.stealthSwitch.addEventListener("click", () => {
+        state.settings.stealth = !state.settings.stealth;
+        saveState("stealth_switch");
+        applyStealth(state.settings.stealth);
+        syncStealthSwitch();
+        toast(state.settings.stealth ? "Stealth ON" : "Stealth OFF");
+      });
+
+      // settings: overdraft
+      el.odSwitch.addEventListener("click", () => {
+        state.settings.allowOverdraft = !state.settings.allowOverdraft;
+        saveState("overdraft_toggle");
+        syncOdSwitch();
+        toast(state.settings.allowOverdraft ? "Overdraft allowed" : "Overdraft blocked");
+        renderAll();
+      });
+
+      // settings: cadence
+      el.backupCadence.addEventListener("change", () => {
+        state.settings.backupCadence = el.backupCadence.value;
+        saveState("cadence_change");
+        toast("Reminder cadence updated");
+        checkBackupReminder();
+      });
+
+      // settings: pin
+      el.reqPin.addEventListener("change", async () => {
+        state.settings.requirePin = !!el.reqPin.checked;
+        saveState("pin_toggle");
+        toast(state.settings.requirePin ? "PIN startup enabled" : "PIN startup disabled");
+      });
+
+      el.savePinBtn.addEventListener("click", async () => {
+        const pin = (el.setPin.value || "").trim();
+        if(!/^[0-9]{4,6}$/.test(pin)) return toast("Enter a 4–6 digit PIN");
+        state.settings.pinHash = await hashPin(pin);
+        el.setPin.value = "";
+        saveState("pin_update");
+        toast("PIN updated");
+      });
+
+      // auth unlock
+      el.unlockBtn.addEventListener("click", unlock);
+      el.authPin.addEventListener("keydown", (e) => { if(e.key === "Enter") unlock(); });
+
+      // backup/restore (both places)
+      el.backupBtn.addEventListener("click", () => backup(true));
+      el.backupBtn2.addEventListener("click", () => backup(true));
+
+      // backup banner actions
+      el.backupBannerDo?.addEventListener("click", () => backup(true));
+      el.backupBannerSnooze?.addEventListener("click", () => {
+        state.settings.backupSnoozeUntil = Date.now() + 24*3600*1000;
+        saveState("backup_snooze");
+        checkBackupReminder();
+        toast("Snoozed 24h");
+      });
+
+      el.restoreBtn.addEventListener("click", () => el.file.click());
+      el.restoreBtn2.addEventListener("click", () => el.file2.click());
+
+      el.file.addEventListener("change", (e) => restoreFile(e.target.files?.[0]));
+      el.file2.addEventListener("change", (e) => restoreFile(e.target.files?.[0]));
+
+      el.wipeBtn.addEventListener("click", () => {
+        if(!confirm("Wipe all device data for this app?")) return;
+        wipeState();
+        location.reload();
+      });
+
+      // diagnostics
+      el.diagBtn.addEventListener("click", () => {
+        const d = derive();
+        el.diagOut.innerHTML = `
+          Entries: <b>${state.entries.length}</b><br/>
+          Active: <b>${d.entriesActive.length}</b><br/>
+          Spend: <b>${money(d.accounts.spend)}</b><br/>
+          Bills: <b>${money(d.accounts.bills)}</b><br/>
+          Savings: <b>${money(d.accounts.savings)}</b><br/>
+          Liquidity: <b>${money(d.liquidityTotal)}</b><br/>
+          Assets: <b>${money(d.assetsTotal)}</b><br/>
+          Net worth: <b>${money(d.netWorth)}</b><br/>
+          Inflow split mode: <b>${esc(state.ui.inflowSplitMode || "off")}</b><br/>
+        `;
+      });
+
+      // sheet
+      el.sheetScrim.addEventListener("click", closeSheet);
+      el.editBtn.addEventListener("click", () => {
+        if(!currentSheetId) return;
+        const entry = getEntryById(currentSheetId);
+        if(!entry || entry.status === "deleted") return;
+        closeSheet();
+        openForm(entry.kind, { fromEntry: entry });
+      });
+      el.dupBtn.addEventListener("click", () => {
+        if(!currentSheetId) return;
+        const entry = getEntryById(currentSheetId);
+        if(!entry) return;
+        closeSheet();
+        openForm(entry.kind, { fromEntry: entry, duplicate:true });
+      });
+      el.delBtn.addEventListener("click", () => {
+        if(!currentSheetId) return;
+        deleteEntry(currentSheetId);
+        closeSheet();
+        renderAll();
+        toast("Deleted");
+      });
+
+      // first render
+      renderAll();
+
+      // initial view gating
+      syncStealthSwitch();
+      syncOdSwitch();
+      hydrateSearchTypeUI();
+      // lock gating
+      isUnlocked = !lockRequired();
+      if(lockRequired()) showView("auth");
+      else showView("dashboard");
+
+      // auth close (cannot bypass)
+      const authClose = $("#authClose");
+      if(authClose){
+        authClose.addEventListener("click", () => {
+          el.authPin.value = "";
+          lockNow();
+        });
+      }
+
+      // lock when app is backgrounded
+      document.addEventListener("visibilitychange", () => { if(document.hidden) lockNow(); });
+
+      // periodic snapshots + reminder checks
+      startPeriodicSafety();
+
+      // service worker best-effort
+      registerSW();
+
+      // nudge on boot if needed
+      setTimeout(checkBackupReminder, 1200);
+    }
+
+    // ---------- Views ----------
+    function showView(view){
+      if(lockRequired() && !isUnlocked && view !== "auth") view = "auth";
+      currentView = view;
+      VIEWS.forEach(v => {
+        if(v === "dashboard") return;
+        const node = el[v];
+        if(!node) return;
+        node.classList.toggle("hidden", v !== view);
+        node.setAttribute("aria-hidden", v !== view ? "true" : "false");
+      });
+
+      el.dashboard.style.display = (view === "auth") ? "none" : "block";
+
+      // backup reminder banner refresh on key screens
+      if(view === "dashboard" || view === "settings") setTimeout(checkBackupReminder, 0);
+
+
+      // fab mode
+      if(view === "dashboard"){
+        el.fab.classList.remove("fabBack");
+        el.fab.classList.add("fabPlus");
+        el.fab.textContent = "＋";
+        el.fab.setAttribute("aria-label", "New entry");
+      } else if(view === "entry"){
+        el.fab.classList.remove("fabPlus");
+        el.fab.classList.add("fabBack");
+        el.fab.textContent = "←";
+        el.fab.setAttribute("aria-label", "Back");
+      } else {
+        el.fab.classList.remove("fabPlus");
+        el.fab.classList.add("fabBack");
+        el.fab.textContent = "⌂";
+        el.fab.setAttribute("aria-label", "Home");
+      }
+
+      if(view === "search") renderSearch();
+      if(view === "dashboard") renderAll();
+      if(view === "more") syncStealthSwitch();
+      if(view === "settings") hydrateSettingsUI();
+    }
+
+    function toggleAudit(id){
+      const wrap = $("#"+id);
+      if(!wrap) return;
+      wrap.classList.toggle("open");
+    }
+
+    // ---------- Ledger open/close ----------
+    function toggleLedger(key){
+      if(openLedger === key){
+        const body = $(`[data-ledger-body="${key}"]`);
+        body?.classList.remove("open");
+        openLedger = null;
+        return;
+      }
+      $$(`.ledgerBody.open`).forEach(b => b.classList.remove("open"));
+      openLedger = key;
+      const body = $(`[data-ledger-body="${key}"]`);
+      body?.classList.add("open");
+      renderLedgerBody(key);
+      if(ledgerFilters[key]) applyLedgerFilter(key, ledgerFilters[key]);
+    }
+
+    // ---------- Rendering ----------
+    function renderAll(){
+      const d = derive();
+
+      el.nw.textContent = money(d.netWorth);
+
+      // cash display color reacts to negative liquidity
+      el.cash.textContent = money(d.liquidityTotal);
+      el.cash.style.color = (d.liquidityTotal < 0) ? "var(--red)" : "var(--emerald)";
+
+      el.assets.textContent = money(d.assetsTotal);
+      el.debt.textContent = money(d.debtTotal);
+
+      el.liq.textContent = money(d.liquidityTotal);
+      el.liq.style.color = (d.liquidityTotal < 0) ? "var(--red)" : "var(--emerald)";
+
+      el.exTotal.textContent = money(d.expensesTotal);
+      el.asTotal.textContent = money(d.assetsTotal);
+      el.dbTotal.textContent = money(d.debtorsOutstanding);
+      el.crTotal.textContent = money(d.creditorsOutstanding);
+      el.fidTotal.textContent = money(d.fidTotal);
+
+      if(openLedger) {
+        renderLedgerBody(openLedger);
+        if(ledgerFilters[openLedger]) applyLedgerFilter(openLedger, ledgerFilters[openLedger]);
+      }
+
+      renderAudit();
+      renderDatalist();
+    }
+
+    function renderLedgerBody(key){
+      const body = $(`[data-ledger-body="${key}"]`);
+      if(!body) return;
+
+      const d = derive();
+
+      if(key === "liquidity"){
+        const cSpend = (d.accounts.spend < 0) ? "var(--red)" : "var(--emerald)";
+        const cBills = (d.accounts.bills < 0) ? "var(--red)" : "var(--emerald)";
+        const cSav = (d.accounts.savings < 0) ? "var(--red)" : "var(--emerald)";
+        body.innerHTML = `
+          <div class="ledgerSubline">Accounts</div>
+          <div class="cols3">
+            <div class="colCard">
+              <div class="lbl">Spend</div>
+              <div class="amt mask" style="color:${cSpend}">${money(d.accounts.spend)}</div>
+            </div>
+            <div class="colCard">
+              <div class="lbl">Bills</div>
+              <div class="amt mask" style="color:${cBills}">${money(d.accounts.bills)}</div>
+            </div>
+            <div class="colCard">
+              <div class="lbl">Savings</div>
+              <div class="amt mask" style="color:${cSav}">${money(d.accounts.savings)}</div>
+            </div>
+          </div>
+          ${
+            (d.accounts.spend < 0 || d.accounts.bills < 0 || d.accounts.savings < 0)
+              ? `<div class="ledgerSubline" style="margin-top:10px;color:var(--red);">Overdrawn account detected</div>`
+              : ""
+          }
+        `;
+        return;
+      }
+
+      // NOTE: For keyboard stability we render list once, then filter rows in-place.
+      // Every row includes data-hit for fast matching.
+
+      if(key === "expenses"){
+        const items = d.entriesActive
+          .filter(e => e.kind === "expense")
+          .sort((a,b) => b.ts - a.ts);
+
+        body.innerHTML = `
+          ${ledgerSearchBox("expenses", "Search expenses…")}
+          <div class="ledgerSubline">Latest</div>
+          <div data-ledger-list="expenses">
+            ${items.length ? items.map(e => tightRow(e, { hit: ledgerHitBlob(e) })).join("") : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`}
+          </div>
+        `;
+        wireLedgerSearch(body, "expenses");
+        return;
+      }
+
+      if(key === "assets"){
+        const assets = d.assetsList
+          .sort((a,b) => Math.abs(b.current||0) - Math.abs(a.current||0));
+
+        body.innerHTML = `
+          ${ledgerSearchBox("assets", "Search assets…")}
+          <div class="ledgerSubline">Initial • Current • Growth</div>
+          <div data-ledger-list="assets">
+            ${
+              assets.length
+                ? assets.map(a => `
+                    <div class="row tap" data-asset="${esc(a.name)}" data-hit="${escAttr((a.name+" "+money(a.current)+" "+money(a.initial)).toLowerCase())}">
+                      <div class="rowLeft">
+                        <div class="rowName">${esc(a.name)}</div>
+                        <div class="rowMeta">
+                          Init ${money(a.initial)} • Now ${money(a.current)} • Growth ${money(a.growth)}${a.initial>0 ? ` (${pct(a.growth/a.initial)})` : ""}
+                        </div>
+                      </div>
+                      <div class="rowAmt mask" style="color:var(--blue);display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                        <div>${money(a.current)}</div>
+                        <span class="chipBtn" data-asset-update="${esc(a.name)}">Update</span>
+                      </div>
+                    </div>
+                  `).join("")
+                : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`
+            }
+            ${d.assetDetail ? renderAssetDetail(d.assetDetail) : ""}
+          </div>
+        `;
+        wireLedgerSearch(body, "assets");
+        return;
+      }
+
+      if(key === "debtors"){
+        const list = d.debtorsList
+          .sort((a,b) => b.outstanding - a.outstanding);
+
+        body.innerHTML = `
+          ${ledgerSearchBox("debtors", "Search debtors…")}
+          <div class="ledgerSubline">Tap a name to see itemised entries</div>
+          <div data-ledger-list="debtors">
+            ${
+              list.length
+                ? list.map(p => `
+                  <div class="listItem" data-debtor="${esc(p.name)}" data-hit="${escAttr((p.name+" "+money(p.outstanding)).toLowerCase())}">
+                    <div class="liName">${esc(p.name)}</div>
+                    <div class="liAmt mask" style="color:var(--emerald)">${money(p.outstanding)}</div>
+                  </div>
+                `).join("")
+                : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`
+            }
+          </div>
+          ${d.debtDetail?.mode === "debtors" ? renderDebtDetail(d.debtDetail) : ""}
+        `;
+        wireLedgerSearch(body, "debtors");
+        return;
+      }
+
+      if(key === "creditors"){
+        const list = d.creditorsList
+          .sort((a,b) => b.outstanding - a.outstanding);
+
+        body.innerHTML = `
+          ${ledgerSearchBox("creditors", "Search creditors…")}
+          <div class="ledgerSubline">Tap a name to see itemised entries</div>
+          <div data-ledger-list="creditors">
+            ${
+              list.length
+                ? list.map(p => `
+                  <div class="listItem" data-creditor="${esc(p.name)}" data-hit="${escAttr((p.name+" "+money(p.outstanding)).toLowerCase())}">
+                    <div class="liName">${esc(p.name)}</div>
+                    <div class="liAmt mask" style="color:var(--red)">${money(p.outstanding)}</div>
+                  </div>
+                `).join("")
+                : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`
+            }
+          </div>
+          ${d.debtDetail?.mode === "creditors" ? renderDebtDetail(d.debtDetail) : ""}
+        `;
+        wireLedgerSearch(body, "creditors");
+        return;
+      }
+
+      if(key === "fiduciary"){
+        const goals = d.fidGoals.sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+        const persons = d.fidPersons.sort((a,b) => Math.abs(b.balance) - Math.abs(a.balance));
+
+        const detail = (fidDetail.mode && fidDetail.key)
+          ? buildFidDetail(d.entriesActive, fidDetail.mode, fidDetail.key)
+          : null;
+
+        body.innerHTML = `
+          ${ledgerSearchBox("fiduciary", "Search goals or people…")}
+          <div class="ledgerSubline">Tap a purpose or person to drill down</div>
+
+          ${
+            detail ? `
+              <div class="detailBox">
+                <div class="detailTitle">
+                  <div class="t">${detail.mode === "goal" ? "Purpose" : "Person"}: ${esc(detail.key)}</div>
+                  <div class="s mask" style="color:var(--yellow)">${money(detail.balance)}</div>
+                </div>
+
+                <div class="kv"><div class="kvL">Total in</div><div class="kvR mask">${money(detail.totals.in)}</div></div>
+                <div class="kv"><div class="kvL">Total out</div><div class="kvR mask">${money(detail.totals.out)}</div></div>
+
+                <div class="ledgerSubline" style="margin-top:12px;">Itemised entries</div>
+                <div data-ledger-list="fidDetail">
+                  ${detail.entries.length ? detail.entries.map(e => tightRow(e, {compact:true, hit: ledgerHitBlob(e) })).join("") : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`}
+                </div>
+
+                <div class="flex gap8" style="margin-top:12px;flex-wrap:wrap;">
+                  <span class="chipBtn chipGood" data-fid-back="1">Back</span>
+                  <span class="chipBtn chipDanger" data-fid-clear="1">Clear</span>
+                </div>
+              </div>
+            ` : ""
+          }
+
+          <div class="twoCol" data-ledger-list="fiduciary">
+            <div class="panel">
+              <div class="panelHead">
+                <div class="panelTitle">By Purpose</div>
+                <div class="badge bFid">Goals</div>
+              </div>
+              <div>
+                ${goals.length ? goals.map(g => `
+                  <div class="listItem" data-fid-goal="${esc(g.key)}" data-hit="${escAttr((g.key+" "+money(g.balance)).toLowerCase())}">
+                    <div class="liName">${esc(g.key)}</div>
+                    <div class="liAmt mask" style="color:var(--yellow)">${money(g.balance)}</div>
+                  </div>
+                `).join("") : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`}
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panelHead">
+                <div class="panelTitle">By Person</div>
+                <div class="badge bFid">People</div>
+              </div>
+              <div>
+                ${persons.length ? persons.map(p => `
+                  <div class="listItem" data-fid-person="${esc(p.key)}" data-hit="${escAttr((p.key+" "+money(p.balance)).toLowerCase())}">
+                    <div class="liName">${esc(p.key)}</div>
+                    <div class="liAmt mask" style="color:var(--yellow)">${money(p.balance)}</div>
+                  </div>
+                `).join("") : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`}
+              </div>
+            </div>
+          </div>
+        `;
+        wireLedgerSearch(body, "fiduciary");
+        return;
+      }
+    }
+
+    function renderAudit(){
+      const q = (el.auditFilter.value || "").trim().toLowerCase();
+      const entries = state.entries
+        .slice()
+        .sort((a,b) => b.ts - a.ts)
+        .filter(e => {
+          if(!q) return true;
+          const blob = [
+            e.kind, e.desc, e.note,
+            e.meta?.account, e.meta?.person, e.meta?.goal,
+            e.meta?.assetName, e.meta?.action,
+            e.meta?.rate, e.meta?.issuedTs, e.meta?.dueTs,
+            e.status, e.supersedesId
+          ].join(" ").toLowerCase();
+          return blob.includes(q);
+        })
+        .slice(0, 120);
+
+      el.auditList.innerHTML = entries.length
+        ? entries.map(e => tightRow(e, { audit:true, hit: ledgerHitBlob(e) })).join("")
+        : `<div class="rowMeta" style="padding:10px 0;">No audit entries</div>`;
+    }
+
+    function renderSearch(){
+      const q = (el.q.value || "").trim().toLowerCase();
+      const type = state.ui.searchType || "all";
+      const start = el.qStart.value ? new Date(el.qStart.value).getTime() : null;
+      const end = el.qEnd.value ? (new Date(el.qEnd.value).getTime() + 24*3600*1000 - 1) : null;
+
+      const entries = state.entries
+        .filter(e => e.status !== "deleted")
+        .filter(e => {
+          if(type === "all") return true;
+          if(type === "income") return e.kind === "income";
+          if(type === "expense") return e.kind === "expense";
+          if(type === "asset") return e.kind === "asset";
+          if(type === "iou") return e.kind === "iou";
+          if(type === "fid") return e.kind === "fid";
+          return true;
+        })
+        .filter(e => {
+          if(start && e.ts < start) return false;
+          if(end && e.ts > end) return false;
+          return true;
+        })
+        .filter(e => !q ? true : searchHit(e, q))
+        .sort((a,b) => b.ts - a.ts)
+        .slice(0, 200);
+
+      el.qRes.innerHTML = entries.length
+        ? entries.map(e => tightRow(e, { compact:true, hit: ledgerHitBlob(e) })).join("")
+        : `<div class="rowMeta" style="padding:10px 0;">No results</div>`;
+    }
+
+    // ---------- Detail Panels ----------
+    function showDebtDetails(mode, who){
+      state.ui.debtDetail = { mode, who };
+      saveState("debt_detail");
+      renderLedgerBody(mode);
+      if(ledgerFilters[mode]) applyLedgerFilter(mode, ledgerFilters[mode]);
+    }
+
+    function showAssetDetails(name){
+      state.ui.assetDetailName = name;
+      saveState("asset_detail");
+      renderLedgerBody("assets");
+      if(ledgerFilters.assets) applyLedgerFilter("assets", ledgerFilters.assets);
+    }
+
+    function renderDebtDetail(detail){
+      const title = detail.mode === "debtors" ? "Debtor details" : "Creditor details";
+      const color = detail.mode === "debtors" ? "var(--emerald)" : "var(--red)";
+
+      return `
+        <div class="detailBox">
+          <div class="detailTitle">
+            <div class="t">${esc(title)} • ${esc(detail.who)}</div>
+            <div class="s mask" style="color:${color}">${money(detail.outstanding)}</div>
+          </div>
+
+          <div class="kv"><div class="kvL">Outstanding</div><div class="kvR mask">${money(detail.outstanding)}</div></div>
+          <div class="kv"><div class="kvL">${detail.mode==="debtors"?"Total given":"Total received"}</div><div class="kvR mask">${money(detail.given)}</div></div>
+          <div class="kv"><div class="kvL">${detail.mode==="debtors"?"Total recovered":"Total repaid"}</div><div class="kvR mask">${money(detail.recovered)}</div></div>
+
+          <div class="ledgerSubline" style="margin-top:12px;">Itemised entries</div>
+          <div>
+            ${detail.entries.length ? detail.entries.map(e => tightRow(e, {compact:true, hit: ledgerHitBlob(e) })).join("") : `<div class="rowMeta" style="padding:10px 0;">No entries</div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAssetDetail(a){
+      return `
+        <div class="detailBox">
+          <div class="detailTitle">
+            <div class="t">${esc(a.name)}</div>
+            <div class="s mask" style="color:var(--blue)">${money(a.current)}</div>
+          </div>
+
+          <div class="kv"><div class="kvL">Initial</div><div class="kvR mask">${money(a.initial)}</div></div>
+          <div class="kv"><div class="kvL">Current</div><div class="kvR mask">${money(a.current)}</div></div>
+          <div class="kv"><div class="kvL">Growth</div><div class="kvR mask">${money(a.growth)}${a.initial>0 ? ` (${pct(a.growth/a.initial)})` : ""}</div></div>
+
+          <div class="ledgerSubline" style="margin-top:12px;">Valuation history</div>
+          <div>
+            ${a.history.length ? a.history.map(e => tightRow(e, {compact:true, hit: ledgerHitBlob(e)})).join("") : `<div class="rowMeta" style="padding:10px 0;">No history</div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    // ---------- Ledger Search box ----------
+    function ledgerSearchBox(key, placeholder){
+      return `
+        <div class="miniSearch">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto;">
+            <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="#9ca3af" stroke-width="2"/>
+            <path d="M16.5 16.5 21 21" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input class="input" data-ledger-filter="${key}" placeholder="${escAttr(placeholder)}" value="${escAttr(ledgerFilters[key]||"")}" />
+        </div>
+      `;
+    }
+
+    // ✅ KEYBOARD FIX:
+    // We do NOT re-render ledger on each keystroke anymore.
+    // Instead we filter visible rows in-place using data-hit attributes.
+    function wireLedgerSearch(body, key){
+      const inp = body.querySelector(`[data-ledger-filter="${key}"]`);
+      if(!inp) return;
+
+      inp.oninput = () => {
+        const val = inp.value || "";
+        ledgerFilters[key] = val;
+        applyLedgerFilter(key, val);
+      };
+    }
+
+    function applyLedgerFilter(key, text){
+      const body = $(`[data-ledger-body="${key}"]`);
+      if(!body) return;
+      const q = (text || "").trim().toLowerCase();
+
+      // Filter any element that has data-hit inside the ledger body
+      const nodes = $$("[data-hit]", body);
+      let shown = 0;
+
+      if(!q){
+        nodes.forEach(n => n.classList.remove("hidden"));
+        return;
+      }
+
+      for(const n of nodes){
+        const hit = (n.getAttribute("data-hit") || "").toLowerCase();
+        const ok = hit.includes(q);
+        n.classList.toggle("hidden", !ok);
+        if(ok) shown++;
+      }
+
+      // Optional: if none match, show a small hint row (without re-render)
+      const markerId = "ledgerNoMatch_" + key;
+      let marker = $("#"+markerId, body);
+
+      if(shown === 0){
+        if(!marker){
+          marker = document.createElement("div");
+          marker.id = markerId;
+          marker.className = "rowMeta";
+          marker.style.padding = "10px 0";
+          marker.textContent = "No matches";
+          body.appendChild(marker);
+        }
+      } else {
+        if(marker) marker.remove();
+      }
+    }
+
+    function ledgerHitBlob(e){
+      return [
+        e.kind, e.desc, e.note,
+        e.meta?.account, e.meta?.person, e.meta?.goal,
+        e.meta?.assetName, e.meta?.action,
+        e.meta?.rate, e.meta?.issuedTs, e.meta?.dueTs,
+        fmtDate(e.ts),
+        e.status
+      ].join(" ").toLowerCase();
+    }
+
+    // ---------- Form ----------
+    function openForm(kind, opts={}){
+      currentForm = kind;
+      currentEditId = null;
+
+      if(opts.fromEntry){
+        const e = opts.fromEntry;
+        if(!opts.duplicate) currentEditId = e.id;
+        currentForm = e.kind;
+      }
+
+      const title = (kind === "income") ? "Inflow"
+                  : (kind === "expense") ? "Expense"
+                  : (kind === "asset") ? "Asset"
+                  : (kind === "borrow") ? "Borrow"
+                  : (kind === "lend") ? "Lend"
+                  : (kind === "fid") ? "Fiduciary"
+                  : "Entry";
+      el.formTitle.textContent = currentEditId ? (title + " (Edit)") : title;
+
+      // reset
+      el.amount.value = "";
+      el.desc.value = "";
+      el.note.value = "";
+      el.dyn.innerHTML = "";
+      el.segWrap.classList.add("hidden");
+      el.segWrap.innerHTML = "";
+      el.desc.placeholder = "Description";
+      el.amount.placeholder = "0";
+
+      // hint reset
+      el.amountHint.classList.add("hidden");
+      el.amountHintTitle.textContent = "Amount";
+      el.amountHintLeft.textContent = "—";
+      el.amountHintRight.textContent = "—";
+
+      const pre = opts.fromEntry ? opts.fromEntry : null;
+
+      if(kind === "income" || kind === "expense"){
+        const acct = (opts.fromEntry?.meta?.account) || state.ui.lastAccount || "spend";
+        buildSegment("Account", ["Spend","Bills","Savings"], acct, (val) => {
+          state.ui.lastAccount = val;
+          saveState("last_account");
+          // If inflow split is on, account segment becomes irrelevant, but we keep it for quick off-mode.
+        });
+
+        el.amountHint.classList.remove("hidden");
+        el.amountHintTitle.textContent = (kind === "income") ? "Inflow" : "Expense";
+        el.amountHintLeft.textContent = "Account";
+        el.amountHintRight.textContent = acct.toUpperCase();
+
+        el.desc.placeholder = "Description";
+
+        // ✅ Inflow split UI (not available when editing an old entry, to keep edits safe)
+        if(kind === "income" && !currentEditId){
+          const mode = state.ui.inflowSplitMode || "off";
+          el.dyn.innerHTML = renderInflowSplitUI(mode);
+          wireInflowSplitUI();
+        }
+      }
+
+      if(kind === "asset"){
+        const assetMode = opts.assetMode || pre?.meta?.action || "new";
+        buildSegment("Mode", ["New","Update"], assetMode === "update" ? "update":"new", () => {
+          // live update of hint/placeholder
+          updateAssetHintUI();
+        });
+        const assetName = opts.assetName || pre?.meta?.assetName || "";
+        el.dyn.innerHTML = `
+          <input id="assetName" class="input" placeholder="Asset name" value="${escAttr(assetName)}" list="assetList" />
+          <datalist id="assetList"></datalist>
+        `;
+        el.desc.placeholder = "Description (optional)";
+
+        // Update hint based on current segment + current assetName
+        setTimeout(updateAssetHintUI, 0);
+
+        // When asset name changes, refresh hint
+        setTimeout(() => {
+          const an = $("#assetName");
+          if(an) an.addEventListener("input", () => updateAssetHintUI());
+        }, 0);
+      }
+
+      if(kind === "borrow" || kind === "lend"){
+        const action = pre?.meta?.action || "new";
+        buildSegment("Mode", ["New","Settle"], action === "settle" ? "settle":"new", () => {});
+        const who = pre?.meta?.person || "";
+        const rate = pre?.meta?.rate ?? "";
+        const issuedTs = pre?.meta?.issuedTs ? fmtISODate(pre.meta.issuedTs) : "";
+        const dueTs = pre?.meta?.dueTs ? fmtISODate(pre.meta.dueTs) : "";
+
+        el.dyn.innerHTML = `
+          <input id="person" class="input" placeholder="Person" value="${escAttr(who)}" list="personList" />
+          <datalist id="personList"></datalist>
+
+          <div id="iouExtra">
+            <input id="rate" class="input" type="number" inputmode="decimal" placeholder="Interest rate % (optional)" value="${escAttr(rate)}" />
+            <input id="issued" class="input" type="date" placeholder="Date issued (optional)" value="${escAttr(issuedTs)}" />
+            <input id="due" class="input" type="date" placeholder="Due date (optional)" value="${escAttr(dueTs)}" />
+          </div>
+        `;
+        el.desc.placeholder = "Description (optional)";
+
+        // Hide extra fields when settling
+        setTimeout(() => {
+          const segVal = getSegmentValue();
+          const box = $("#iouExtra");
+          if(box) box.style.display = (segVal === "settle") ? "none" : "block";
+          const seg = $("#seg", el.segWrap);
+          seg?.addEventListener("click", () => {
+            const v = getSegmentValue();
+            if(box) box.style.display = (v === "settle") ? "none" : "block";
+          });
+        }, 0);
+      }
+
+      if(kind === "fid"){
+        const action = pre?.meta?.action || "in";
+        buildSegment("Direction", ["In","Out"], action, () => {});
+        const goal = pre?.meta?.goal || "";
+        const person = pre?.meta?.person || "";
+        el.dyn.innerHTML = `
+          <input id="goal" class="input" placeholder="Purpose / Goal" value="${escAttr(goal)}" list="goalList" />
+          <datalist id="goalList"></datalist>
+          <input id="person" class="input" placeholder="Person" value="${escAttr(person)}" list="personList2" />
+          <datalist id="personList2"></datalist>
+        `;
+        el.desc.placeholder = "Description (optional)";
+      }
+
+      if(pre){
+        el.amount.value = pre.amount ?? "";
+        el.desc.value = pre.desc ?? "";
+        el.note.value = pre.note ?? "";
+      }
+
+      fillDynamicDatalists();
+      showView("form");
+      el.amount.focus();
+    }
+
+    function renderInflowSplitUI(mode){
+      const m = mode || "off";
+      const onOff = (v) => (v === m ? "on" : "");
+      return `
+        <div class="tiny muted" style="margin:6px 0 8px 0;">Allocation</div>
+        <div class="seg" id="inflowSplitSeg" style="margin-bottom:10px;">
+          <button type="button" data-split="off" class="${onOff("off")}">Off</button>
+          <button type="button" data-split="pct" class="${onOff("pct")}">%</button>
+          <button type="button" data-split="amt" class="${onOff("amt")}">Amount</button>
+        </div>
+
+        <div id="inflowSplitBox" class="${m==="off" ? "hidden" : ""}">
+          <div class="ledgerSubline" style="margin-top:4px;">Fill any 2 fields — the 3rd auto-completes</div>
+
+          <div class="grid2" style="gap:12px;">
+            <div>
+              <div class="tiny muted" style="margin-top:6px;">Spend</div>
+              <input id="inSpend" class="input" type="number" inputmode="decimal" placeholder="${m==="pct" ? "Percent" : "Amount"}" />
+            </div>
+            <div>
+              <div class="tiny muted" style="margin-top:6px;">Bills</div>
+              <input id="inBills" class="input" type="number" inputmode="decimal" placeholder="${m==="pct" ? "Percent" : "Amount"}" />
+            </div>
+            <div>
+              <div class="tiny muted" style="margin-top:6px;">Savings</div>
+              <input id="inSavings" class="input" type="number" inputmode="decimal" placeholder="${m==="pct" ? "Percent" : "Amount"}" />
+            </div>
+            <div>
+              <div class="tiny muted" style="margin-top:6px;">Check</div>
+              <div id="inflowSplitCheck" class="hintBox" style="padding:12px;">
+                <div class="hintTitle">Total</div>
+                <div class="hintRow">
+                  <div class="muted">${m==="pct" ? "Must be 100%" : "Must equal amount"}</div>
+                  <div id="inflowSplitTotal" class="mask">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tiny muted" style="margin-top:10px;">
+            Tip: enter the big Amount first, then allocate.
+          </div>
+        </div>
+      `;
+    }
+
+    function wireInflowSplitUI(){
+      const seg = $("#inflowSplitSeg");
+      if(!seg) return;
+
+      const setMode = (mode) => {
+        state.ui.inflowSplitMode = mode;
+        saveState("inflow_split_mode");
+        // refresh UI without killing focus in amount input (only rebuild dyn)
+        el.dyn.innerHTML = renderInflowSplitUI(mode);
+        wireInflowSplitUI();
+        // keep amount input focused if user was typing
+      };
+
+      seg.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-split]");
+        if(!b) return;
+        $$("button", seg).forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+        setMode(b.getAttribute("data-split"));
+      });
+
+      const mode = state.ui.inflowSplitMode || "off";
+      if(mode === "off") return;
+
+      const A = $("#inSpend"), B = $("#inBills"), C = $("#inSavings");
+      const totalEl = $("#inflowSplitTotal");
+      const box = $("#inflowSplitBox");
+
+      if(!A || !B || !C || !totalEl || !box) return;
+
+      const recompute = (changed) => {
+        const total = Number(el.amount.value || 0);
+        if(!isFinite(total) || total <= 0){
+          totalEl.textContent = "Enter Amount";
+          return;
+        }
+
+        const a = parseNum(A.value);
+        const b = parseNum(B.value);
+        const c = parseNum(C.value);
+
+        if(mode === "pct"){
+          // Any two -> third = 100 - sum(two)
+          const filled = [
+            {k:"a", v:a, el:A},
+            {k:"b", v:b, el:B},
+            {k:"c", v:c, el:C},
+          ].filter(x => x.v !== null);
+
+          if(filled.length >= 2){
+            const sum = filled.reduce((s,x)=> s + x.v, 0);
+            const missing = [{k:"a", el:A, v:a},{k:"b", el:B, v:b},{k:"c", el:C, v:c}].find(x => x.v === null);
+            if(missing){
+              const val = clampNum(100 - sum, 0, 100);
+              missing.el.value = String(round2(val));
+            }
+          }
+
+          const aa = parseNum(A.value) ?? 0;
+          const bb = parseNum(B.value) ?? 0;
+          const cc = parseNum(C.value) ?? 0;
+          const sum2 = aa + bb + cc;
+          totalEl.textContent = round2(sum2) + "%";
+        }
+
+        if(mode === "amt"){
+          // Any two -> third = total - sum(two)
+          const filled = [
+            {k:"a", v:a, el:A},
+            {k:"b", v:b, el:B},
+            {k:"c", v:c, el:C},
+          ].filter(x => x.v !== null);
+
+          if(filled.length >= 2){
+            const sum = filled.reduce((s,x)=> s + x.v, 0);
+            const missing = [{k:"a", el:A, v:a},{k:"b", el:B, v:b},{k:"c", el:C, v:c}].find(x => x.v === null);
+            if(missing){
+              const val = clampNum(total - sum, 0, total);
+              missing.el.value = String(round2(val));
+            }
+          }
+
+          const aa = parseNum(A.value) ?? 0;
+          const bb = parseNum(B.value) ?? 0;
+          const cc = parseNum(C.value) ?? 0;
+          const sum2 = aa + bb + cc;
+          totalEl.textContent = money(sum2);
+        }
+      };
+
+      // Update on allocation typing (no re-render)
+      [A,B,C].forEach(inp => inp.addEventListener("input", () => recompute(inp.id)));
+
+      // Also recompute when Amount changes
+      el.amount.addEventListener("input", () => recompute("amount"), { once:true });
+
+      // initial check
+      setTimeout(() => recompute("init"), 0);
+    }
+
+    function buildSegment(label, labels, initialValue, onChange){
+      el.segWrap.classList.remove("hidden");
+      const map = {
+        "Spend":"spend","Bills":"bills","Savings":"savings",
+        "New":"new","Update":"update",
+        "Settle":"settle",
+        "In":"in","Out":"out"
+      };
+      const init = map[initialValue] ? map[initialValue] : initialValue;
+
+      const buttons = labels.map(l => {
+        const val = map[l] || l.toLowerCase();
+        return `<button type="button" data-seg="${val}" class="${val===init ? "on":""}">${l}</button>`;
+      }).join("");
+
+      el.segWrap.innerHTML = `
+        <div class="tiny muted" style="margin-bottom:8px;">${label}</div>
+        <div class="seg" id="seg">${buttons}</div>
+      `;
+
+      const seg = $("#seg", el.segWrap);
+      seg.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-seg]");
+        if(!b) return;
+        $$("button", seg).forEach(x => x.classList.remove("on"));
+        b.classList.add("on");
+        onChange(b.getAttribute("data-seg"));
+
+        // update hint for income/expense account view
+        if(currentForm === "income" || currentForm === "expense"){
+          el.amountHint.classList.remove("hidden");
+          el.amountHintLeft.textContent = "Account";
+          el.amountHintRight.textContent = (b.getAttribute("data-seg") || "").toUpperCase();
+        }
+      });
+    }
+
+    function getSegmentValue(){
+      const btn = $("#seg button.on", el.segWrap);
+      return btn ? btn.getAttribute("data-seg") : null;
+    }
+
+    function updateAssetHintUI(){
+      if(currentForm !== "asset") return;
+      const mode = getSegmentValue() || "new";
+      const assetName = ($("#assetName")?.value || "").trim();
+
+      el.amountHint.classList.remove("hidden");
+      if(assetName){
+        const snap = getAssetSnapshot(assetName);
+        if(snap){
+          if(mode === "update"){
+            el.amountHintTitle.textContent = "Asset update";
+            el.amount.placeholder = "New current value";
+            el.amountHintLeft.textContent = `Current: ${money(snap.current)} • Initial: ${money(snap.initial)}`;
+            el.amountHintRight.textContent = snap.lastTs ? fmtDateTime(snap.lastTs) : "—";
+            return;
+          } else {
+            el.amountHintTitle.textContent = "Asset (new)";
+            el.amount.placeholder = "Initial value";
+            el.amountHintLeft.textContent = `Existing current: ${money(snap.current)}`;
+            el.amountHintRight.textContent = "You’re creating a new baseline";
+            return;
+          }
+        }
+      }
+
+      el.amountHintTitle.textContent = (mode === "update") ? "Asset update" : "Asset (new)";
+      el.amount.placeholder = (mode === "update") ? "New current value" : "Initial value";
+      el.amountHintLeft.textContent = "Tip";
+      el.amountHintRight.textContent = (mode === "update") ? "Pick an existing asset name" : "Set your first value";
+    }
+
+    async function executeForm(){
+      const amt = Number(el.amount.value);
+      if(!isFinite(amt) || amt <= 0){
+        return toast("Enter an amount");
+      }
+
+      const desc = (el.desc.value || "").trim();
+      const note = (el.note.value || "").trim();
+      const editOf = currentEditId ? getEntryById(currentEditId) : null;
+
+      if(currentForm === "income" || currentForm === "expense"){
+        const account = getSegmentValue() || state.ui.lastAccount || "spend";
+
+        // ✅ Inflow split execution
+        if(currentForm === "income" && !currentEditId){
+          const mode = state.ui.inflowSplitMode || "off";
+          if(mode !== "off"){
+            const A = $("#inSpend"), B = $("#inBills"), C = $("#inSavings");
+            if(!A || !B || !C) return toast("Allocation inputs missing");
+
+            if(mode === "pct"){
+              const pSpend = parseNum(A.value) ?? 0;
+              const pBills = parseNum(B.value) ?? 0;
+              const pSavings = parseNum(C.value) ?? 0;
+              const sum = round2(pSpend + pBills + pSavings);
+              if(Math.abs(sum - 100) > 0.01) return toast("Percent must total 100%");
+              const aAmt = round2((pSpend/100) * amt);
+              const bAmt = round2((pBills/100) * amt);
+              // Make last bucket absorb rounding errors
+              const cAmt = round2(amt - aAmt - bAmt);
+
+              const group = uid();
+              const entries = [
+                makeEntry("income", aAmt, desc, note, { account:"spend", splitGroupId: group, splitMode:"pct", splitValue:pSpend }),
+                makeEntry("income", bAmt, desc, note, { account:"bills", splitGroupId: group, splitMode:"pct", splitValue:pBills }),
+                makeEntry("income", cAmt, desc, note, { account:"savings", splitGroupId: group, splitMode:"pct", splitValue:pSavings }),
+              ].filter(x => x.amount > 0);
+
+              commitEntries(entries);
+              showView("dashboard");
+              renderAll();
+              toast("Saved (split)");
+              return;
+            }
+
+            if(mode === "amt"){
+              const aAmt = parseNum(A.value) ?? 0;
+              const bAmt = parseNum(B.value) ?? 0;
+              const cAmt = parseNum(C.value) ?? 0;
+              const sum = round2(aAmt + bAmt + cAmt);
+              if(Math.abs(sum - amt) > 0.01) return toast("Split amounts must equal Amount");
+
+              const group = uid();
+              const entries = [
+                makeEntry("income", aAmt, desc, note, { account:"spend", splitGroupId: group, splitMode:"amt" }),
+                makeEntry("income", bAmt, desc, note, { account:"bills", splitGroupId: group, splitMode:"amt" }),
+                makeEntry("income", cAmt, desc, note, { account:"savings", splitGroupId: group, splitMode:"amt" }),
+              ].filter(x => x.amount > 0);
+
+              commitEntries(entries);
+              showView("dashboard");
+              renderAll();
+              toast("Saved (split)");
+              return;
+            }
+          }
+        }
+
+        // Guardrail: block spending from empty account unless overdraft is allowed
+        if(currentForm === "expense" && !state.settings.allowOverdraft){
+          const d = derive();
+          const bal = Number(d.accounts[account] || 0);
+          if(amt > bal){
+            return toast(`Insufficient funds in ${account.toUpperCase()} (${money(bal)})`);
+          }
+        }
+
+        const entry = makeEntry(currentForm, amt, desc, note, { account });
+        commitEntry(entry, editOf);
+        showView("dashboard");
+        renderAll();
+        toast(currentEditId ? `Edited (${account.toUpperCase()})` : `Saved (${account.toUpperCase()})`);
+        return;
+      }
+
+      if(currentForm === "asset"){
+        const mode = getSegmentValue() || "new";
+        const assetName = ($("#assetName")?.value || "").trim();
+        if(!assetName) return toast("Enter asset name");
+
+        const entry = makeEntry("asset", amt, desc, note, { action: mode, assetName });
+        commitEntry(entry, editOf);
+        showView("dashboard");
+        renderAll();
+        toast(currentEditId ? "Edited" : "Saved");
+        return;
+      }
+
+      if(currentForm === "borrow" || currentForm === "lend"){
+        const mode = getSegmentValue() || "new";
+        const who = ($("#person")?.value || "").trim();
+        if(!who) return toast("Enter person");
+
+        // Optional extras (only meaningful for "new")
+        let rate = null, issuedTs = null, dueTs = null;
+        if(mode === "new"){
+          const r = ($("#rate")?.value || "").trim();
+          rate = r === "" ? null : Number(r);
+          const issued = ($("#issued")?.value || "").trim();
+          const due = ($("#due")?.value || "").trim();
+          issuedTs = issued ? new Date(issued + "T00:00:00").getTime() : null;
+          dueTs = due ? new Date(due + "T00:00:00").getTime() : null;
+          if(rate !== null && (!isFinite(rate) || rate < 0)) return toast("Invalid rate");
+        }
+
+        const entry = makeEntry("iou", amt, desc, note, {
+          direction: currentForm === "lend" ? "debtors" : "creditors",
+          action: mode,
+          person: who,
+          rate,
+          issuedTs,
+          dueTs
+        });
+        commitEntry(entry, editOf);
+        showView("dashboard");
+        renderAll();
+        toast(currentEditId ? "Edited" : "Saved");
+        return;
+      }
+
+      if(currentForm === "fid"){
+        const dir = getSegmentValue() || "in";
+        const goal = ($("#goal")?.value || "").trim();
+        const who = ($("#person")?.value || "").trim();
+        if(!goal) return toast("Enter purpose / goal");
+        if(!who) return toast("Enter person");
+        const entry = makeEntry("fid", amt, desc, note, { action: dir, goal, person: who });
+        commitEntry(entry, editOf);
+        showView("dashboard");
+        renderAll();
+        toast(currentEditId ? "Edited" : "Saved");
+        return;
+      }
+
+      toast("Unknown form");
+    }
+
+    function makeEntry(kind, amount, desc, note, meta={}){
+      return {
+        id: uid(),
+        ts: Date.now(),
+        kind,
+        amount: safeNum(amount),
+        desc: desc || "",
+        note: note || "",
+        meta,
+        status: "active",
+        supersedesId: null
+      };
+    }
+
+    function commitEntries(entries){
+      for(const e of entries){
+        state.entries.push(e);
+      }
+      saveState("commit_entries");
+    }
+
+    function commitEntry(newEntry, oldEntry){
+      if(oldEntry){
+        const idx = state.entries.findIndex(x => x.id === oldEntry.id);
+        if(idx !== -1){
+          state.entries[idx] = { ...state.entries[idx], status:"superseded" };
+        }
+        newEntry.supersedesId = oldEntry.id;
+        newEntry.meta = { ...newEntry.meta, editedFrom: oldEntry.id };
+      }
+      state.entries.push(newEntry);
+
+      if(newEntry.kind === "asset") state.ui.lastAsset = newEntry.meta.assetName || state.ui.lastAsset;
+      if(newEntry.kind === "iou") state.ui.lastPerson = newEntry.meta.person || state.ui.lastPerson;
+      if(newEntry.kind === "fid") {
+        state.ui.lastGoal = newEntry.meta.goal || state.ui.lastGoal;
+        state.ui.lastPerson2 = newEntry.meta.person || state.ui.lastPerson2;
+      }
+
+      saveState("commit_entry");
+    }
+
+    function deleteEntry(id){
+      const idx = state.entries.findIndex(e => e.id === id);
+      if(idx === -1) return;
+      state.entries[idx] = { ...state.entries[idx], status:"deleted" };
+      saveState("delete_entry");
+    }
+
+    // ---------- Derivations ----------
+    function derive(){
+      const entriesAll = state.entries.slice().sort((a,b) => a.ts - b.ts);
+      const entriesActive = entriesAll.filter(e => e.status === "active");
+
+      const accounts = { spend:0, bills:0, savings:0 };
+      let expensesTotal = 0;
+
+      for(const e of entriesActive){
+        if(e.kind === "income"){
+          const acct = e.meta?.account || "spend";
+          accounts[acct] = (accounts[acct] || 0) + safeNum(e.amount);
+        }
+        if(e.kind === "expense"){
+          const acct = e.meta?.account || "spend";
+          accounts[acct] = (accounts[acct] || 0) - safeNum(e.amount);
+          expensesTotal += safeNum(e.amount);
+        }
+      }
+
+      const liquidityTotal = accounts.spend + accounts.bills + accounts.savings;
+
+      // Assets
+      const assetEntries = entriesActive.filter(e => e.kind === "asset" && e.meta?.assetName);
+      const assetsMap = new Map();
+      for(const e of assetEntries){
+        const name = e.meta.assetName;
+        if(!assetsMap.has(name)) assetsMap.set(name, []);
+        assetsMap.get(name).push(e);
+      }
+
+      const assetsList = [];
+      for(const [name, list] of assetsMap.entries()){
+        list.sort((a,b) => a.ts - b.ts);
+        const initial = safeNum(list[0]?.amount || 0);
+        const current = safeNum(list[list.length-1]?.amount || 0);
+        const growth = current - initial;
+        const history = list.slice().sort((a,b)=> b.ts - a.ts);
+        assetsList.push({ name, initial, current, growth, history, lastTs: list[list.length-1]?.ts || null });
+      }
+
+      const assetsTotal = assetsList.reduce((s,a)=> s + safeNum(a.current||0), 0);
+
+      // Debt (IOU)
+      const iouEntries = entriesActive.filter(e => e.kind === "iou");
+      const debtorsMap = new Map();
+      const creditorsMap = new Map();
+
+      for(const e of iouEntries){
+        const dir = e.meta?.direction;
+        const who = (e.meta?.person || "").trim();
+        if(!who) continue;
+        const target = (dir === "creditors") ? creditorsMap : debtorsMap;
+        if(!target.has(who)) target.set(who, { name: who, given:0, recovered:0, entries:[] });
+        const box = target.get(who);
+        const action = e.meta?.action || "new";
+        if(action === "settle") box.recovered += safeNum(e.amount);
+        else box.given += safeNum(e.amount);
+        box.entries.push(e);
+      }
+
+      const debtorsList = Array.from(debtorsMap.values()).map(p => ({ ...p, outstanding: Math.max(0, p.given - p.recovered) }));
+      const creditorsList = Array.from(creditorsMap.values()).map(p => ({ ...p, outstanding: Math.max(0, p.given - p.recovered) }));
+
+      const debtorsOutstanding = debtorsList.reduce((s,p)=> s + p.outstanding, 0);
+      const creditorsOutstanding = creditorsList.reduce((s,p)=> s + p.outstanding, 0);
+      const debtTotal = debtorsOutstanding + creditorsOutstanding;
+
+      // Fiduciary
+      const fidEntries = entriesActive.filter(e => e.kind === "fid");
+      const fidGoalMap = new Map();
+      const fidPersonMap = new Map();
+
+      let fidTotal = 0;
+      for(const e of fidEntries){
+        const goal = (e.meta?.goal || "").trim();
+        const person = (e.meta?.person || "").trim();
+        const dir = e.meta?.action || "in";
+        const signed = (dir === "out") ? -safeNum(e.amount) : safeNum(e.amount);
+
+        fidTotal += signed;
+
+        if(goal) fidGoalMap.set(goal, (fidGoalMap.get(goal) || 0) + signed);
+        if(person) fidPersonMap.set(person, (fidPersonMap.get(person) || 0) + signed);
+      }
+
+      const fidGoals = Array.from(fidGoalMap.entries()).map(([key,balance]) => ({ key, balance }));
+      const fidPersons = Array.from(fidPersonMap.entries()).map(([key,balance]) => ({ key, balance }));
+
+      // detail panels
+      let debtDetail = null;
+      if(state.ui.debtDetail?.mode && state.ui.debtDetail?.who){
+        const mode = state.ui.debtDetail.mode;
+        const who = state.ui.debtDetail.who;
+        const map = (mode === "creditors") ? creditorsMap : debtorsMap;
+        const p = map.get(who);
+        if(p){
+          const outstanding = Math.max(0, p.given - p.recovered);
+          debtDetail = {
+            mode,
+            who,
+            outstanding,
+            given: p.given,
+            recovered: p.recovered,
+            entries: p.entries.slice().sort((a,b)=> b.ts - a.ts)
+          };
+        }
+      }
+
+      let assetDetail = null;
+      if(state.ui.assetDetailName){
+        const name = state.ui.assetDetailName;
+        const a = assetsList.find(x => x.name === name);
+        if(a) assetDetail = a;
+      }
+
+      const netWorth = liquidityTotal + assetsTotal;
+
+      return {
+        entriesAll,
+        entriesActive,
+        accounts,
+        liquidityTotal,
+        assetsList,
+        assetsTotal,
+        expensesTotal,
+        debtorsList,
+        creditorsList,
+        debtorsOutstanding,
+        creditorsOutstanding,
+        debtTotal,
+        fidTotal,
+        fidGoals,
+        fidPersons,
+        debtDetail,
+        assetDetail,
+        netWorth
+      };
+    }
+
+    function buildFidDetail(entriesActive, mode, key){
+      const isGoal = mode === "goal";
+      const hits = entriesActive
+        .filter(e => e.kind === "fid")
+        .filter(e => {
+          const g = (e.meta?.goal || "").trim();
+          const p = (e.meta?.person || "").trim();
+          return isGoal ? g === key : p === key;
+        })
+        .sort((a,b)=> b.ts - a.ts);
+
+      let tin = 0, tout = 0;
+      for(const e of hits){
+        const dir = e.meta?.action || "in";
+        if(dir === "out") tout += safeNum(e.amount);
+        else tin += safeNum(e.amount);
+      }
+      const balance = tin - tout;
+
+      return { mode, key, balance, totals:{in:tin, out:tout}, entries: hits };
+    }
+
+    function getAssetSnapshot(name){
+      const d = derive();
+      const a = d.assetsList.find(x => x.name === name);
+      return a ? { initial:a.initial, current:a.current, lastTs:a.lastTs } : null;
+    }
+
+    // ---------- Sheet ----------
+    function openSheet(id){
+      const e = getEntryById(id);
+      if(!e) return;
+
+      currentSheetId = id;
+      el.sheetTitle.textContent = sheetTitle(e);
+      el.sheetAmt.textContent = sheetAmountText(e);
+
+      el.sheetMeta.innerHTML = `
+        <div class="kv"><div class="kvL">Date</div><div class="kvR">${fmtDateTime(e.ts)}</div></div>
+        <div class="kv"><div class="kvL">Status</div><div class="kvR">${esc(e.status || "active")}${e.supersedesId ? " • revision" : ""}</div></div>
+        ${e.meta?.account ? `<div class="kv"><div class="kvL">Account</div><div class="kvR">${esc(e.meta.account)}</div></div>` : ""}
+        ${e.meta?.splitGroupId ? `<div class="kv"><div class="kvL">Split</div><div class="kvR">${esc(e.meta.splitMode || "split")}</div></div>` : ""}
+        ${e.meta?.assetName ? `<div class="kv"><div class="kvL">Asset</div><div class="kvR">${esc(e.meta.assetName)}</div></div>` : ""}
+        ${e.meta?.person ? `<div class="kv"><div class="kvL">Person</div><div class="kvR">${esc(e.meta.person)}</div></div>` : ""}
+        ${e.meta?.goal ? `<div class="kv"><div class="kvL">Purpose</div><div class="kvR">${esc(e.meta.goal)}</div></div>` : ""}
+        ${(e.kind==="iou" && e.meta?.rate!=null) ? `<div class="kv"><div class="kvL">Rate</div><div class="kvR">${esc(String(e.meta.rate))}%</div></div>` : ""}
+        ${(e.kind==="iou" && e.meta?.issuedTs) ? `<div class="kv"><div class="kvL">Issued</div><div class="kvR">${fmtDate(e.meta.issuedTs)}</div></div>` : ""}
+        ${(e.kind==="iou" && e.meta?.dueTs) ? `<div class="kv"><div class="kvL">Due</div><div class="kvR">${fmtDate(e.meta.dueTs)}</div></div>` : ""}
+        ${e.desc ? `<div class="kv"><div class="kvL">Desc</div><div class="kvR">${esc(e.desc)}</div></div>` : ""}
+        ${e.note ? `<div class="kv"><div class="kvL">Note</div><div class="kvR">${esc(e.note)}</div></div>` : ""}
+        ${e.supersedesId ? `<div class="kv"><div class="kvL">Edits</div><div class="kvR">${esc(e.supersedesId)}</div></div>` : ""}
+      `;
+
+      const canEdit = e.status === "active";
+      el.editBtn.disabled = !canEdit;
+      el.delBtn.disabled = (e.status === "deleted");
+
+      el.sheetScrim.classList.add("on");
+      el.sheet.classList.add("on");
+      el.sheet.setAttribute("aria-hidden","false");
+    }
+
+    function closeSheet(){
+      currentSheetId = null;
+      el.sheetScrim.classList.remove("on");
+      el.sheet.classList.remove("on");
+      el.sheet.setAttribute("aria-hidden","true");
+    }
+
+    // ---------- UI helpers ----------
+    function tightRow(e, opts={}){
+      const badge = kindBadge(e);
+      const amtColor = amountColor(e);
+      const statusBadge = (e.status === "superseded") ? `<span class="badge bRev">REV</span>` :
+                          (e.status === "deleted") ? `<span class="badge bRev">DEL</span>` : "";
+      const metaLine = compactMeta(e);
+      const hit = opts.hit || ledgerHitBlob(e);
+
+      return `
+        <div class="tightRow" data-entry-id="${escAttr(e.id)}" data-hit="${escAttr(hit)}" title="${escAttr(metaLine)}">
+          <div class="tightLeft">
+            <div class="tightTop">
+              ${badge}
+              ${statusBadge}
+              <div class="tightText">${esc(compactTitle(e))}</div>
+            </div>
+            <div class="tightMeta">${esc(metaLine)}</div>
+          </div>
+          <div class="tightAmt mask" style="color:${amtColor}">${sheetAmountText(e)}</div>
+        </div>
+      `;
+    }
+
+    function kindBadge(e){
+      if(e.kind === "income") return `<span class="badge bIn">IN</span>`;
+      if(e.kind === "expense") return `<span class="badge bOut">OUT</span>`;
+      if(e.kind === "asset") return `<span class="badge bAsset">ASSET</span>`;
+      if(e.kind === "iou") return `<span class="badge bIOU">IOU</span>`;
+      if(e.kind === "fid") return `<span class="badge bFid">FID</span>`;
+      return `<span class="badge">LOG</span>`;
+    }
+
+    function amountColor(e){
+      if(e.kind === "expense") return "var(--red)";
+      if(e.kind === "income") return "var(--emerald)";
+      if(e.kind === "asset") return "var(--blue)";
+      if(e.kind === "fid") return "var(--yellow)";
+      if(e.kind === "iou") return (e.meta?.direction === "creditors") ? "var(--red)" : "var(--emerald)";
+      return "#fff";
+    }
+
+    function sheetTitle(e){
+      if(e.kind === "income") return "Inflow";
+      if(e.kind === "expense") return "Expense";
+      if(e.kind === "asset") return (e.meta?.action === "update") ? "Asset update" : "Asset";
+      if(e.kind === "fid") return (e.meta?.action === "out") ? "Fiduciary out" : "Fiduciary in";
+      if(e.kind === "iou"){
+        const dir = e.meta?.direction === "creditors" ? "Borrow" : "Lend";
+        const act = e.meta?.action === "settle" ? "settlement" : "entry";
+        return `${dir} (${act})`;
+      }
+      return "Entry";
+    }
+
+    function sheetAmountText(e){
+      const sign = (e.kind === "expense") ? "-" :
+                   (e.kind === "income") ? "+" :
+                   (e.kind === "fid") ? ((e.meta?.action==="out") ? "-" : "+") :
+                   "";
+      return sign + money(e.amount);
+    }
+
+    function compactTitle(e){
+      if(e.kind === "asset") return e.meta?.assetName || e.desc || "Asset";
+      if(e.kind === "iou") return e.meta?.person || e.desc || "IOU";
+      if(e.kind === "fid") return e.meta?.goal || e.desc || "Fiduciary";
+      return e.desc || sheetTitle(e);
+    }
+
+    function compactMeta(e){
+      const d = fmtDate(e.ts);
+      const parts = [d];
+
+      if(e.kind === "income" || e.kind === "expense"){
+        if(e.meta?.account) parts.push(e.meta.account);
+        if(e.meta?.splitGroupId) parts.push("split");
+      }
+      if(e.kind === "asset"){
+        parts.push(e.meta?.action === "update" ? "update" : "new");
+      }
+      if(e.kind === "iou"){
+        const act = e.meta?.action === "settle" ? "settle" : "new";
+        const dir = e.meta?.direction === "creditors" ? "you owe" : "owed to you";
+        const r = (e.meta?.rate!=null && isFinite(e.meta.rate)) ? ` • ${e.meta.rate}%` : "";
+        const due = e.meta?.dueTs ? ` • due ${fmtDate(e.meta.dueTs)}` : "";
+        parts.push(`${dir} • ${act}${r}${due}`);
+      }
+      if(e.kind === "fid"){
+        const g = e.meta?.goal || "";
+        const p = e.meta?.person || "";
+        parts.push(`${e.meta?.action==="out"?"out":"in"} • ${g} • ${p}`);
+      }
+      if(e.note) parts.push("• " + e.note);
+
+      return parts.join(" • ").replace(/\s+/g," ").trim();
+    }
+
+    function searchHit(e, q){
+      if(!q) return true;
+      const blob = [
+        e.kind, e.desc, e.note,
+        e.meta?.account, e.meta?.person, e.meta?.goal,
+        e.meta?.assetName, e.meta?.action, e.status,
+        e.meta?.rate, e.meta?.issuedTs, e.meta?.dueTs
+      ].join(" ").toLowerCase();
+      return blob.includes(q);
+    }
+
+    function renderDatalist(){
+      const d = derive();
+      const names = new Set();
+
+      d.entriesActive.forEach(e => {
+        if(e.desc) names.add(e.desc);
+        if(e.meta?.person) names.add(e.meta.person);
+        if(e.meta?.goal) names.add(e.meta.goal);
+        if(e.meta?.assetName) names.add(e.meta.assetName);
+      });
+
+      const items = Array.from(names).filter(Boolean).slice(0, 200);
+      el.nameList.innerHTML = items.map(n => `<option value="${escAttr(n)}"></option>`).join("");
+    }
+
+    function fillDynamicDatalists(){
+      const d = derive();
+
+      const assetNames = Array.from(new Set(d.assetsList.map(a => a.name))).sort();
+      const persons = Array.from(new Set(
+        d.entriesActive
+          .filter(e => e.kind==="iou" || e.kind==="fid")
+          .map(e => e.meta?.person)
+          .filter(Boolean)
+      )).sort();
+      const goals = Array.from(new Set(
+        d.entriesActive
+          .filter(e => e.kind==="fid")
+          .map(e => e.meta?.goal)
+          .filter(Boolean)
+      )).sort();
+
+      const assetList = $("#assetList");
+      if(assetList) assetList.innerHTML = assetNames.map(x => `<option value="${escAttr(x)}"></option>`).join("");
+
+      const personList = $("#personList");
+      if(personList) personList.innerHTML = persons.map(x => `<option value="${escAttr(x)}"></option>`).join("");
+
+      const personList2 = $("#personList2");
+      if(personList2) personList2.innerHTML = persons.map(x => `<option value="${escAttr(x)}"></option>`).join("");
+
+      const goalList = $("#goalList");
+      if(goalList) goalList.innerHTML = goals.map(x => `<option value="${escAttr(x)}"></option>`).join("");
+    }
+
+    function hydrateSearchTypeUI(){
+      const t = state.ui.searchType || "all";
+      $$(".badge[data-qtype]", el.search).forEach(x => x.style.opacity = ".55");
+      const b = $(`.badge[data-qtype="${t}"]`, el.search);
+      if(b) b.style.opacity = "1";
+    }
+
+    function hydrateSettingsUI(){
+      el.reqPin.checked = !!state.settings.requirePin;
+      el.backupCadence.value = state.settings.backupCadence || "off";
+      syncStealthSwitch();
+      syncOdSwitch();
+    }
+
+    function applyStealth(on){
+      document.body.classList.toggle("stealth", !!on);
+    }
+
+    function syncStealthSwitch(){
+      const on = !!state.settings.stealth;
+      el.stealthSwitch.classList.toggle("on", on);
+      el.stealthSwitch.setAttribute("aria-checked", on ? "true" : "false");
+    }
+
+    function syncOdSwitch(){
+      const on = !!state.settings.allowOverdraft;
+      el.odSwitch.classList.toggle("on", on);
+      el.odSwitch.setAttribute("aria-checked", on ? "true" : "false");
+    }
+
+    // ---------- Auth ----------
+    async function unlock(){
+      if(Date.now() < lockUntilTs) return toast("Try again shortly");
+      const pin = (el.authPin.value || "").trim();
+      if(!/^[0-9]{4,6}$/.test(pin)) return toast("Enter 4–6 digits");
+      const h = await hashPin(pin);
+      if(!state.settings.pinHash){
+        toast("No PIN set");
+        showView("dashboard");
+        el.authPin.value = "";
+        return;
+      }
+      if(h !== state.settings.pinHash){
+        failedUnlocks++;
+        if(failedUnlocks >= 5){
+          lockUntilTs = Date.now() + 15000;
+          failedUnlocks = 0;
+          return toast("Too many attempts. Wait 15s");
+        }
+        return toast("Wrong PIN");
+      }
+      el.authPin.value = "";
+      isUnlocked = true;
+      failedUnlocks = 0;
+      lockUntilTs = 0;
+      showView("dashboard");
+      toast("Unlocked");
+    }
+
+    async function hashPin(pin){
+      try{
+        const enc = new TextEncoder().encode(pin);
+        const buf = await crypto.subtle.digest("SHA-256", enc);
+        const arr = Array.from(new Uint8Array(buf));
+        return arr.map(b => b.toString(16).padStart(2,"0")).join("");
+      } catch {
+        return btoa(pin.split("").reverse().join(""));
+      }
+    }
+
+    // ---------- Backup / Restore ----------
+    function backup(manual=false){
+      const payload = JSON.stringify(state, null, 2);
+      const blob = new Blob([payload], { type:"application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `sovereign_v87_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+
+      if(manual){
+        state.settings.lastManualBackupTs = Date.now();
+        state.settings.lastReminderTs = 0;
+        state.settings.backupSnoozeUntil = 0;
+        saveState("manual_backup");
+      }
+      toast("Backup downloaded");
+    }
+
+    async function restoreFile(file){
+      if(!file) return;
+
+      // Snapshot current state BEFORE doing anything
+      try{
+        localStorage.setItem(AUTO_KEYS.preRestore, JSON.stringify(state));
+      }catch{}
+
+      try{
+        const text = await file.text();
+        const raw = JSON.parse(text);
+
+        const migrated = migrateState(raw);
+        const valid = validateState(migrated);
+        if(!valid.ok){
+          toast("Invalid backup: " + valid.reason);
+          return;
+        }
+
+        // persist + refresh
+        persistState(migrated, { reason: "restore" });
+        toast("Restored");
+        // reset file inputs so same file can be selected again
+        try{ el.file.value = ""; }catch{}
+        try{ el.file2.value = ""; }catch{}
+        location.reload();
+      } catch (err) {
+        toast("Restore failed: " + (err?.message || "unknown"));
+        try{ el.file.value = ""; }catch{}
+        try{ el.file2.value = ""; }catch{}
+      }
+    }
+
+    function wipeState(){
+      [...STORE_KEYS, AUTO_KEYS.lastGood, AUTO_KEYS.preRestore, AUTO_KEYS.ringIndex]
+        .forEach(k => localStorage.removeItem(k));
+      for(let i=0;i<AUTO_RING_SIZE;i++){
+        localStorage.removeItem(AUTO_KEYS.ringPrefix + i);
+      }
+    }
+
+    // ---------- Storage + Safety ----------
+    function loadState(){
+      for(const k of STORE_KEYS){
+        const raw = localStorage.getItem(k);
+        if(!raw) continue;
+        try{
+          const obj = JSON.parse(raw);
+          const migrated = migrateState(obj);
+          const valid = validateState(migrated);
+          if(valid.ok) return migrated;
+        }catch{}
+      }
+
+      // Try last-good snapshot
+      try{
+        const lg = localStorage.getItem(AUTO_KEYS.lastGood);
+        if(lg){
+          const obj = JSON.parse(lg);
+          const migrated = migrateState(obj);
+          const valid = validateState(migrated);
+          if(valid.ok) return migrated;
+        }
+      }catch{}
+
+      return normalizeState({
+        schema: SCHEMA_VERSION,
+        entries: [],
+        settings: {
+          stealth:false,
+          requirePin:false,
+          pinHash:null,
+          allowOverdraft:false,
+          backupCadence:"off",
+          lastManualBackupTs: 0,
+          lastReminderTs: 0,
+          backupSnoozeUntil: 0
+        },
+        ui: { searchType:"all", lastAccount:"spend", inflowSplitMode:"off" }
+      });
+    }
+
+    function migrateState(s){
+      const base = (s && typeof s === "object") ? s : {};
+      const out = normalizeState({
+        schema: SCHEMA_VERSION,
+        entries: Array.isArray(base.entries) ? base.entries : [],
+        settings: base.settings || {},
+        ui: base.ui || {}
+      });
+      out.schema = SCHEMA_VERSION;
+      return out;
+    }
+
+    function normalizeState(s){
+      const out = {
+        schema: SCHEMA_VERSION,
+        entries: Array.isArray(s.entries) ? s.entries.map(normalizeEntry) : [],
+        settings: {
+          stealth: !!(s.settings?.stealth),
+          requirePin: !!(s.settings?.requirePin),
+          pinHash: s.settings?.pinHash || null,
+
+          allowOverdraft: !!(s.settings?.allowOverdraft),
+          backupCadence: s.settings?.backupCadence || "off",
+          lastManualBackupTs: Number(s.settings?.lastManualBackupTs || 0),
+          lastReminderTs: Number(s.settings?.lastReminderTs || 0),
+          backupSnoozeUntil: Number(s.settings?.backupSnoozeUntil || 0)
+        },
+        ui: {
+          searchType: s.ui?.searchType || "all",
+          lastAccount: s.ui?.lastAccount || "spend",
+          lastAsset: s.ui?.lastAsset || "",
+          lastPerson: s.ui?.lastPerson || "",
+          lastGoal: s.ui?.lastGoal || "",
+          lastPerson2: s.ui?.lastPerson2 || "",
+          debtDetail: s.ui?.debtDetail || null,
+          assetDetailName: s.ui?.assetDetailName || null,
+
+          inflowSplitMode: s.ui?.inflowSplitMode || "off"
+        }
+      };
+      return out;
+    }
+
+    function normalizeEntry(e){
+      const meta = e.meta || {};
+      const kind = (typeof e.kind === "string" ? e.kind : "log");
+      return {
+        id: e.id || uid(),
+        ts: typeof e.ts === "number" ? e.ts : Date.now(),
+        kind,
+        amount: safeNum(e.amount),
+        desc: e.desc || "",
+        note: e.note || "",
+        meta: {
+          ...meta,
+          rate: (meta.rate === null || meta.rate === undefined || meta.rate === "") ? null : safeNum(meta.rate),
+          issuedTs: meta.issuedTs ? Number(meta.issuedTs) : null,
+          dueTs: meta.dueTs ? Number(meta.dueTs) : null
+        },
+        status: e.status || "active",
+        supersedesId: e.supersedesId || null
+      };
+    }
+
+    function validateState(s){
+      if(!s || typeof s !== "object") return { ok:false, reason:"not an object" };
+      if(!Array.isArray(s.entries)) return { ok:false, reason:"entries missing" };
+      if(!s.settings || typeof s.settings !== "object") return { ok:false, reason:"settings missing" };
+      if(!s.ui || typeof s.ui !== "object") return { ok:false, reason:"ui missing" };
+
+      for(const e of s.entries.slice(0, 5000)){
+        if(!e || typeof e !== "object") return { ok:false, reason:"bad entry" };
+        if(!e.id || typeof e.id !== "string") return { ok:false, reason:"entry id missing" };
+        if(typeof e.ts !== "number") return { ok:false, reason:"entry ts missing" };
+        if(typeof e.amount !== "number" || !isFinite(e.amount)) return { ok:false, reason:"entry amount invalid" };
+      }
+      return { ok:true };
+    }
+
+    function saveState(reason="save"){
+      persistState(state, { reason });
+    }
+
+    function persistState(s, meta={}){
+      const payload = JSON.stringify(s);
+      try{ localStorage.setItem(STORE_KEYS[0], payload); }catch{}
+
+      for(let i=1;i<STORE_KEYS.length;i++){
+        try{ localStorage.setItem(STORE_KEYS[i], payload); }catch{}
+      }
+
+      // ✅ snapshot the state being saved (NOT the global 'state' reference)
+      autoSnapshot(s, meta.reason || "change");
+
+      try{ localStorage.setItem(AUTO_KEYS.lastGood, payload); }catch{}
+    }
+
+    function autoSnapshot(s, reason="change"){
+      if(!saneAutoEnabled()) return;
+
+      try{
+        const idx = Number(localStorage.getItem(AUTO_KEYS.ringIndex) || "0") % AUTO_RING_SIZE;
+        const stamp = {
+          schema: SCHEMA_VERSION,
+          reason,
+          at: Date.now(),
+          state: s
+        };
+        localStorage.setItem(AUTO_KEYS.ringPrefix + idx, JSON.stringify(stamp));
+        localStorage.setItem(AUTO_KEYS.ringIndex, String((idx + 1) % AUTO_RING_SIZE));
+      }catch{}
+    }
+
+    function saneAutoEnabled(){ return true; }
+
+    function startPeriodicSafety(){
+      setInterval(() => {
+        autoSnapshot(state, "periodic");
+      }, PERIODIC_SNAPSHOT_MS);
+    }
+
+    function checkBackupReminder(){
+      const cadence = state.settings.backupCadence || "off";
+      if(cadence === "off"){
+        el.backupBanner?.classList.add("hidden");
+        return;
+      }
+
+      const now = Date.now();
+      const snoozeUntil = Number(state.settings.backupSnoozeUntil || 0);
+      if(snoozeUntil && now < snoozeUntil){
+        el.backupBanner?.classList.add("hidden");
+        return;
+      }
+
+      const last = Number(state.settings.lastManualBackupTs || 0);
+      const interval = cadence === "daily" ? 24*3600*1000
+                    : cadence === "weekly" ? 7*24*3600*1000
+                    : cadence === "monthly" ? 30*24*3600*1000
+                    : 0;
+      if(!interval){
+        el.backupBanner?.classList.add("hidden");
+        return;
+      }
+
+      if(!last){
+        if(el.backupBannerText) el.backupBannerText.textContent = "You’ve never exported a backup. Export now.";
+        el.backupBanner?.classList.remove("hidden");
+        return;
+      }
+
+      if(now - last < interval){
+        el.backupBanner?.classList.add("hidden");
+        return;
+      }
+
+      const days = Math.floor((now - last) / (24*3600*1000));
+      if(el.backupBannerText) el.backupBannerText.textContent = `Last export was ${days} day(s) ago. Export a backup (${cadence}).`;
+      el.backupBanner?.classList.remove("hidden");
+    }
+    }
+
+    function getEntryById(id){
+      return state.entries.find(e => e.id === id) || null;
+    }
+
+    // ---------- Formatting ----------
+    function money(n){
+      const x = safeNum(n);
+      const sign = (x < 0) ? "-" : "";
+      const abs = Math.abs(x);
+      return sign + "₦" + abs.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+
+    function pct(x){
+      if(!isFinite(x)) return "0%";
+      return (x*100).toFixed(1).replace(/\.0$/,"") + "%";
+    }
+
+    function fmtDate(ts){
+      const d = new Date(ts);
+      const dd = String(d.getDate()).padStart(2,"0");
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const yy = d.getFullYear();
+      return `${dd}-${mm}-${yy}`;
+    }
+
+    function fmtISODate(ts){
+      const d = new Date(ts);
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,"0");
+      const day = String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function fmtDateTime(ts){
+      const d = new Date(ts);
+      const dd = String(d.getDate()).padStart(2,"0");
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const yy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mi = String(d.getMinutes()).padStart(2,"0");
+      return `${dd}-${mm}-${yy} ${hh}:${mi}`;
+    }
+
+    function uid(){
+      return "e_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
+    }
+
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+    function escAttr(s){
+      return esc(s).replace(/"/g,"&quot;");
+    }
+
+    // ---------- Toast ----------
+    let toastTimer = null;
+    function toast(msg){
+      el.toastText.textContent = msg;
+      el.toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.toast.classList.remove("show"), 1800);
+    }
+
+    // ---------- Long press ----------
+    function setupLongPress(node, fn){
+      let t = null;
+      let moved = false;
+
+      const start = () => {
+        moved = false;
+        clearTimeout(t);
+        t = setTimeout(() => { if(!moved) fn(); }, 520);
+      };
+      const end = () => clearTimeout(t);
+
+      node.addEventListener("touchstart", start, {passive:true});
+      node.addEventListener("touchmove", () => { moved = true; }, {passive:true});
+      node.addEventListener("touchend", end, {passive:true});
+      node.addEventListener("touchcancel", end, {passive:true});
+
+      node.addEventListener("mousedown", start);
+      node.addEventListener("mousemove", () => { moved = true; });
+      node.addEventListener("mouseup", end);
+      node.addEventListener("mouseleave", end);
+    }
+
+    // ---------- Service worker (best effort) ----------
+    async function registerSW(){
+  if(!("serviceWorker" in navigator)) return;
+  try{
+    await navigator.serviceWorker.register("./sw.js");
+  } catch {}
+}
+
+    // ---------- Utils ----------
+    function safeNum(x){
+      if(x === null || x === undefined) return 0;
+      const s = String(x).replace(/,/g,"").trim();
+      const n = Number(s);
+      return (isFinite(n) ? n : 0);
+    }
+
+    function parseNum(x){
+      if(x === null || x === undefined) return null;
+      const s = String(x).trim();
+      if(s === "") return null;
+      const n = Number(s);
+      return isFinite(n) ? n : null;
+    }
+
+    function clampNum(n, lo, hi){
+      if(!isFinite(n)) return lo;
+      return Math.max(lo, Math.min(hi, n));
+    }
+
+    function round2(n){
+      return Math.round((n + Number.EPSILON) * 100) / 100;
+    }
+  </script>
+</body>
+</html>
