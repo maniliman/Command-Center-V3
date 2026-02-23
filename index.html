@@ -470,7 +470,7 @@
       background:#fff;opacity:.85;
       transition:transform .15s ease;
     }
-    .switch.on{background:rgba(47,143,120,.16);border-color:rgba(16,185,129,.4);}
+    .switch.on{background:rgba(47,143,120,.16);border-color:rgba(47,143,120,.28);}
     .switch.on::after{transform:translateX(20px);background:var(--emerald);opacity:1;}
 
     /* Segments */
@@ -641,7 +641,7 @@
     </div>
     <div class="col" style="min-height: calc(100vh - 200px);justify-content:center;align-items:center;">
       <div style="font-size:44px;margin-bottom:10px;">🔒</div>
-      <input id="authPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6""
+      <input id="authPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6"
              style="text-align:center;font-size:40px;letter-spacing:10px;width:220px;"
              placeholder="••••••" />
       <button class="btn btnWide" id="unlockBtn" style="margin-top:26px;">Unlock</button>
@@ -756,7 +756,7 @@
     <div class="overlayTop">
       <div class="overlayBar">
         <div class="tiny muted">New entry</div>
-        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+        <button class="xbtn" data-view="dashboard">✕</button>
       </div>
     </div>
 
@@ -848,7 +848,7 @@
     <div class="overlayTop">
       <div class="overlayBar">
         <div class="tiny muted">Search</div>
-        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+        <button class="xbtn" data-view="dashboard">✕</button>
       </div>
     </div>
 
@@ -889,7 +889,7 @@
     <div class="overlayTop">
       <div class="overlayBar">
         <div class="tiny muted">More</div>
-        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+        <button class="xbtn" data-view="dashboard">✕</button>
       </div>
     </div>
 
@@ -918,7 +918,7 @@
     <div class="overlayTop">
       <div class="overlayBar">
         <div class="tiny muted">Settings</div>
-        <button class="xbtn" type="button" id="authClose" aria-label="Locked">✕</button>
+        <button class="xbtn" data-view="dashboard">✕</button>
       </div>
     </div>
 
@@ -927,7 +927,7 @@
         <div class="tiny muted">PIN startup</div>
         <input id="reqPin" type="checkbox" />
       </div>
-      <input id="setPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6""
+      <input id="setPin" class="input" type="password" autocomplete="off" inputmode="numeric" maxlength="6"
              style="text-align:center;letter-spacing:10px;font-size:22px;"
              placeholder="••••••" />
       <button class="btn btnWide" id="savePinBtn" style="margin-top:14px;">Update PIN</button>
